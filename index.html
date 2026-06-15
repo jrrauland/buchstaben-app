@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Buchstaben Schreiben</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  height: 100%;
+  background: #EEF2FF;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* HEADER */
+#header {
+  flex-shrink: 0;
+  background: #4338CA;
+  padding: 8px 14px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+#header-title { color: white; font-size: 16px; font-weight: 700; }
+#header-sub   { color: rgba(255,255,255,0.6); font-size: 10px; }
+#case-toggle  { display: flex; background: rgba(255,255,255,0.2); border-radius: 18px; overflow: hidden; }
+.case-btn {
+  padding: 4px 13px; font-size: 13px; font-weight: 700;
+  color: rgba(255,255,255,0.65); border: none; background: transparent; cursor: pointer;
+}
+.case-btn.active { background: white; color: #4338CA; border-radius: 18px; }
+
+/* LETTER BAR */
+#letter-bar {
+  flex-shrink: 0;
+  background: white;
+  border-bottom: 1px solid #C7D2FE;
+  padding: 6px 10px;
+  display: flex; gap: 5px; overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+#letter-bar::-webkit-scrollbar { display: none; }
+.lbtn {
+  flex-shrink: 0;
+  width: 34px; height: 34px; border-radius: 8px;
+  border: 1.5px solid #C7D2FE; background: #EEF2FF;
+  font-size: 15px; font-weight: 700; color: #4338CA;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+.lbtn.active  { background: #4338CA; color: white; border-color: #4338CA; }
+.lbtn.done    { background: #D1FAE5; border-color: #6EE7B7; color: #065F46; }
+.lbtn.special { background: #F5F3FF; border-color: #DDD6FE; color: #6D28D9; }
+.lbtn.special.active { background: #6D28D9; color: white; border-color: #6D28D9; }
+
+/* CONTENT */
+#content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 12px 12px;
+  display: flex; flex-direction: column; gap: 7px;
+}
+
+/* GUIDE CARD */
+#guide-card {
+  flex-shrink: 0;
+  background: white; border-radius: 12px;
+  border: 1px solid #C7D2FE;
+  padding: 8px 10px;
+  display: flex; align-items: center; gap: 10px;
+}
+#guide-big {
+  width: 58px; height: 58px; flex-shrink: 0;
+  background: #EEF2FF; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+#guide-big svg { width: 48px; height: 48px; overflow: visible; }
+#guide-info { flex: 1; min-width: 0; }
+#guide-name { font-size: 13px; font-weight: 700; color: #1F2937; }
+#guide-tip  { font-size: 11px; color: #6B7280; margin-top: 2px; line-height: 1.4; }
+#anim-btn {
+  flex-shrink: 0;
+  background: #4338CA; color: white; border: none;
+  border-radius: 8px; padding: 7px 10px;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  white-space: nowrap;
+}
+#anim-btn:active { background: #3730A3; }
+
+/* CANVAS AREA — square 1:1 so paths are not distorted */
+#canvas-wrap {
+  flex-shrink: 0;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #C7D2FE;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+}
+/* padding-bottom trick for 1:1 aspect ratio (works on all Android Chrome) */
+#canvas-wrap::after {
+  content: '';
+  display: block;
+  padding-bottom: 100%;
+}
+#draw-canvas {
+  display: block;
+  cursor: crosshair;
+  touch-action: none;
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+}
+#stroke-svg {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  opacity: 0; transition: opacity 0.25s;
+}
+#stroke-svg.visible { opacity: 1; }
+
+/* TOOLBAR */
+#toolbar { flex-shrink: 0; display: flex; gap: 6px; }
+.tbtn {
+  flex: 1; padding: 9px 4px;
+  border-radius: 9px; border: 1.5px solid #E5E7EB;
+  background: white; font-size: 12px; font-weight: 700; color: #374151;
+  cursor: pointer;
+}
+.tbtn.go { background: #4338CA; color: white; border-color: #4338CA; }
+.tbtn.go:active { background: #3730A3; }
+
+/* FEEDBACK */
+#feedback {
+  flex-shrink: 0;
+  min-height: 28px; text-align: center;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+}
+#feedback-stars { font-size: 20px; }
+#feedback-msg   { font-size: 13px; font-weight: 700; color: #4338CA; }
+
+/* PROGRESS */
+#prog-wrap {
+  flex-shrink: 0;
+  background: white; border-radius: 12px; border: 1px solid #C7D2FE;
+  padding: 8px 10px;
+}
+#prog-label { font-size: 10px; font-weight: 700; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+#prog-row   { display: flex; gap: 3px; flex-wrap: wrap; }
+.pdot {
+  width: 22px; height: 22px; border-radius: 5px;
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  background: #F3F4F6; color: #9CA3AF; border: 1px solid #E5E7EB;
+  cursor: pointer; transition: all 0.2s;
+}
+.pdot.done    { background: #D1FAE5; color: #065F46; border-color: #6EE7B7; }
+.pdot.current { background: #4338CA; color: white;   border-color: #4338CA; }
+
+/* CONFETTI */
+#confetti-canvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:100; display:none; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <div id="header-title">✏️ Buchstaben schreiben</div>
+    <div id="header-sub">Deutsche Druckschrift</div>
+  </div>
+  <div id="case-toggle">
+    <button class="case-btn active" id="btn-upper" onclick="setCase('upper')">ABC</button>
+    <button class="case-btn"        id="btn-lower" onclick="setCase('lower')">abc</button>
+  </div>
+</div>
+
+<div id="letter-bar"></div>
+
+<div id="content">
+  <div id="guide-card">
+    <div id="guide-big"></div>
+    <div id="guide-info">
+      <div id="guide-name">Buchstabe A</div>
+      <div id="guide-tip">Zwei Schrägstriche von oben – dann ein Querbalken in der Mitte.</div>
+    </div>
+    <button id="anim-btn" onclick="showAnim()">▶ Zeigen</button>
+  </div>
+
+  <div id="canvas-wrap">
+    <canvas id="draw-canvas"></canvas>
+    <svg id="stroke-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <div id="toolbar">
+    <button class="tbtn" onclick="undo()">↩ Rückgängig</button>
+    <button class="tbtn" onclick="clear()">🗑 Löschen</button>
+    <button class="tbtn go" onclick="checkDone()">⭐ Weiter</button>
+  </div>
+
+  <div id="feedback">
+    <span id="feedback-stars"></span>
+    <span id="feedback-msg"></span>
+  </div>
+
+  <div id="prog-wrap">
+    <div id="prog-label">Fortschritt</div>
+    <div id="prog-row"></div>
+  </div>
+</div>
+
+<canvas id="confetti-canvas"></canvas>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+
+const UPPER = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','Ä','Ö','Ü','ß'];
+const LOWER = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','ä','ö','ü','ß'];
+
+const TIPS = {
+  'A':'Zwei Schrägstriche von oben nach unten. Dann ein Querbalken in der Mitte.',
+  'B':'Senkrechter Strich. Dann oben ein kleiner Bogen und unten ein größerer Bogen nach rechts.',
+  'C':'Bogen von rechts oben gegen den Uhrzeigersinn – unten offen lassen.',
+  'D':'Senkrechter Strich. Dann ein großer Bogen nach rechts.',
+  'E':'Senkrechter Strich. Dann drei Querstriche: oben, Mitte, unten.',
+  'F':'Senkrechter Strich. Dann Querstriche oben und in der Mitte (kein unterer Strich).',
+  'G':'Wie C, dann in der Mitte einen kurzen Strich nach links.',
+  'H':'Zwei senkrechte Striche. Dann ein Querbalken in der Mitte.',
+  'I':'Ein senkrechter Strich von oben nach unten.',
+  'J':'Senkrechter Strich, unten nach links gebogen.',
+  'K':'Senkrechter Strich. Dann zwei Schrägstriche rechts: einer zur Mitte hin, einer von der Mitte weg.',
+  'L':'Senkrechter Strich. Dann unten ein kurzer Strich nach rechts.',
+  'M':'Senkrechter Strich links. Dann schräg zur Mitte runter, wieder hoch, dann senkrecht runter.',
+  'N':'Senkrechter Strich. Dann eine Diagonale nach rechts unten. Dann wieder senkrecht hoch.',
+  'O':'Ein geschlossener Oval – oben beginnen, links herum fahren.',
+  'P':'Senkrechter Strich. Dann oben ein Halbkreis nach rechts (nur bis zur Mitte).',
+  'Q':'Wie O, dann außen unten rechts ein kleiner Schrägstrich.',
+  'R':'Wie P, dann von der Mitte ein Schrägstrich nach rechts unten.',
+  'S':'Oben ein Bogen nach links, unten ein Bogen nach rechts.',
+  'T':'Querbalken oben. Dann senkrechter Strich von der Mitte nach unten.',
+  'U':'Zwei senkrechte Striche, unten rund verbunden.',
+  'V':'Zwei Schrägstriche, die sich unten in einer Spitze treffen.',
+  'W':'Wie zwei V nebeneinander.',
+  'X':'Zwei Schrägstriche, die sich in der Mitte kreuzen.',
+  'Y':'Zwei Schrägstriche treffen sich in der Mitte. Von dort senkrecht nach unten.',
+  'Z':'Querbalken oben. Schräge Linie nach unten links. Querbalken unten.',
+  'Ä':'Wie A – dann zwei Punkte oben darüber.',
+  'Ö':'Wie O – dann zwei Punkte oben darüber.',
+  'Ü':'Wie U – dann zwei Punkte oben darüber.',
+  'ß':'Langer senkrechter Strich. Dann oben ein kleiner Bogen nach rechts, und darunter ein zweiter größerer Bogen nach rechts.',
+  'a':'Bogen von oben rechts gegen den Uhrzeigersinn – dann rechts ein senkrechter Strich.',
+  'b':'Hoher senkrechter Strich. Dann unten rechts ein Bogen.',
+  'c':'Kleiner offener Bogen – oben beginnen, gegen den Uhrzeigersinn.',
+  'd':'Erst ein Oval in der Mitte. Dann rechts davon einen langen Strich hoch bis zur Oberlänge.',
+  'e':'Waagerechter Strich in der Mitte, dann Bogen nach oben und links unten offen.',
+  'f':'Bogen oben links, dann senkrecht nach unten. Querbalken in der Mitte.',
+  'g':'Wie a – aber der Strich rechts geht unter die Linie und biegt nach links.',
+  'h':'Hoher senkrechter Strich. Dann oben rechts ein Bogen nach rechts unten.',
+  'i':'Kleiner senkrechter Strich. Dann ein Punkt oben.',
+  'j':'Kleiner senkrechter Strich, unten nach links gebogen. Dann ein Punkt oben.',
+  'k':'Hoher senkrechter Strich. Dann ein kleiner Bogen zur Mitte und ein Schrägstrich nach rechts unten.',
+  'l':'Ein hoher senkrechter Strich.',
+  'm':'Wie zwei kleine n nebeneinander.',
+  'n':'Senkrechter Strich. Dann von oben ein Bogen nach rechts unten.',
+  'o':'Kleiner geschlossener Oval.',
+  'p':'Strich von oben nach unten unter die Linie. Dann oben rechts ein Bogen.',
+  'q':'Erst ein Oval in der Mitte. Dann rechts davon einen Strich, der unter die Linie hinuntergeht.',
+  'r':'Kleiner senkrechter Strich. Dann oben einen kurzen Bogen nach rechts.',
+  's':'Kleiner doppelter Bogen – oben nach links, unten nach rechts.',
+  't':'Senkrechter Strich. Querbalken in der Mitte.',
+  'u':'Zwei kleine Striche, unten rund verbunden.',
+  'v':'Zwei Schrägstriche, die sich unten treffen.',
+  'w':'Wie zwei kleine v.',
+  'x':'Zwei kleine Schrägstriche, die sich kreuzen.',
+  'y':'Wie v, der rechte Strich geht weiter unter die Linie.',
+  'z':'Kleiner Querbalken oben. Schräge Linie nach unten links. Querbalken unten.',
+  'ä':'Wie a – dann zwei Punkte oben darüber.',
+  'ö':'Wie o – zwei Punkte oben.',
+  'ü':'Wie u – zwei Punkte oben.',
+};
+
+// Stroke paths: viewBox 0 0 100 100
+// Ruling lines at y=20 (cap/ascender), y=50 (x-height), y=80 (baseline)
+// Uppercase/ascenders: y=20–80. x-height letters: y=50–80. Descenders: y=80–100.
+const STROKES = {
+  // ── UPPERCASE (y=20 top, y=80 baseline) ──
+  'A': [['M50,20 L22,80'],['M50,20 L78,80'],['M32,55 L68,55']],
+  'B': [['M25,20 L25,80'],['M25,20 Q65,20 65,38 Q65,50 25,50'],['M25,50 Q68,50 68,65 Q68,80 25,80']],
+  'C': [['M75,28 Q50,16 30,32 Q14,50 30,68 Q50,84 75,74']],
+  'D': [['M25,20 L25,80'],['M25,20 Q80,20 80,50 Q80,80 25,80']],
+  'E': [['M25,20 L25,80'],['M25,20 L72,20'],['M25,50 L62,50'],['M25,80 L72,80']],
+  'F': [['M25,20 L25,80'],['M25,20 L72,20'],['M25,50 L62,50']],
+  'G': [['M75,28 Q50,16 30,32 Q14,50 30,68 Q50,84 75,74 Q80,62 75,50'],['M75,50 L50,50']],
+  'H': [['M22,20 L22,80'],['M78,20 L78,80'],['M22,50 L78,50']],
+  'I': [['M50,20 L50,80']],
+  'J': [['M65,20 L65,65 Q65,84 42,84 Q28,84 26,70']],
+  'K': [['M22,20 L22,80'],['M74,20 L22,50'],['M22,50 L74,80']],
+  'L': [['M25,20 L25,80'],['M25,80 L72,80']],
+  'M': [['M15,80 L15,20'],['M15,20 L50,52'],['M50,52 L85,20'],['M85,20 L85,80']],
+  'N': [['M22,80 L22,20'],['M22,20 L78,80'],['M78,80 L78,20']],
+  'O': [['M50,20 Q85,20 85,50 Q85,80 50,80 Q15,80 15,50 Q15,20 50,20']],
+  'P': [['M25,20 L25,80'],['M25,20 Q70,20 70,38 Q70,55 25,55']],
+  'Q': [['M50,20 Q85,20 85,50 Q85,80 50,80 Q15,80 15,50 Q15,20 50,20'],['M62,68 L78,84']],
+  'R': [['M25,20 L25,80'],['M25,20 Q70,20 70,38 Q70,55 25,55'],['M50,55 L76,80']],
+  'S': [['M74,28 Q48,14 32,32 Q20,50 55,54 Q82,58 76,72 Q66,86 34,80']],
+  'T': [['M20,20 L80,20'],['M50,20 L50,80']],
+  'U': [['M22,20 L22,62 Q22,82 50,82 Q78,82 78,62 L78,20']],
+  'V': [['M18,20 L50,80'],['M82,20 L50,80']],
+  'W': [['M12,20 L30,80'],['M30,80 L50,48'],['M50,48 L70,80'],['M70,80 L88,20']],
+  'X': [['M20,20 L80,80'],['M80,20 L20,80']],
+  'Y': [['M18,20 L50,52'],['M82,20 L50,52'],['M50,52 L50,80']],
+  'Z': [['M20,20 L80,20'],['M80,20 L20,80'],['M20,80 L80,80']],
+  'Ä': [['M50,28 L22,80'],['M50,28 L78,80'],['M32,58 L68,58'],['M35,16 L35,16'],['M65,16 L65,16']],
+  'Ö': [['M50,22 Q85,22 85,50 Q85,80 50,80 Q15,80 15,50 Q15,22 50,22'],['M35,14 L35,14'],['M65,14 L65,14']],
+  'Ü': [['M22,22 L22,62 Q22,82 50,82 Q78,82 78,62 L78,22'],['M35,14 L35,14'],['M65,14 L65,14']],
+  'ß': [['M32,90 L32,22 Q32,10 46,10 Q60,10 60,26 Q60,42 32,46'],['M32,46 Q66,48 66,64 Q66,80 50,82 Q42,82 38,76']],
+  // ── LOWERCASE ──
+  // tall/ascender letters: y=20 (ascender) to y=80 (baseline)
+  // normal letters: y=50 (x-height) to y=80 (baseline)
+  // descenders: go to y=100
+  'a': [['M68,52 Q50,40 34,52 Q20,62 34,72 Q50,82 68,70 L68,52'],['M68,52 L68,80']],
+  'b': [['M28,20 L28,80'],['M28,58 Q28,42 44,42 Q66,42 66,62 Q66,80 44,80 Q28,80 28,68']],
+  'c': [['M66,56 Q50,40 34,54 Q20,66 34,76 Q50,86 66,74']],
+  'd': [['M66,54 Q66,44 54,46 Q38,46 30,58 Q24,70 36,78 Q50,84 66,74 Z'],['M66,20 L66,80']],
+  'e': [['M24,62 L66,62 Q66,44 50,40 Q30,36 22,56 Q16,72 34,80 Q52,88 68,76']],
+  'f': [['M64,24 Q50,14 44,28 L40,80'],['M30,52 L56,52']],
+  'g': [['M66,52 Q50,40 34,52 Q20,62 34,72 Q50,82 66,70 L66,52'],['M66,52 L66,90 Q66,100 44,100 Q30,100 26,90']],
+  'h': [['M28,20 L28,80'],['M28,56 Q38,40 58,44 Q70,50 70,62 L70,80']],
+  'i': [['M50,52 L50,80'],['M50,42 L50,42']],
+  'j': [['M55,52 L55,88 Q55,98 36,98'],['M55,42 L55,42']],
+  'k': [['M28,20 L28,80'],['M62,46 L28,62'],['M28,62 L64,80']],
+  'l': [['M50,20 L50,80']],
+  'm': [['M18,52 L18,80'],['M18,58 Q28,40 46,46 Q56,52 56,64 L56,80'],['M56,58 Q66,40 82,46 Q90,52 90,64 L90,80']],
+  'n': [['M28,52 L28,80'],['M28,58 Q38,40 60,46 Q72,52 72,64 L72,80']],
+  'o': [['M50,40 Q26,40 22,60 Q18,80 42,84 Q66,88 74,68 Q80,50 64,44 Q56,40 50,40']],
+  'p': [['M30,52 L30,100'],['M30,62 Q46,42 64,50 Q76,60 74,72 Q68,84 46,84 Q30,84 30,70']],
+  'q': [['M50,40 Q26,40 20,60 Q14,78 38,86 Q60,90 66,72 Q68,58 58,48 Q52,40 50,40'],['M66,52 L66,100']],
+  'r': [['M28,52 L28,80'],['M28,58 Q40,40 64,46']],
+  's': [['M64,50 Q46,38 32,50 Q20,62 44,68 Q66,74 64,78 Q60,88 38,86 Q26,84 22,74']],
+  't': [['M50,22 L50,76 Q50,84 60,84'],['M32,52 L66,52']],
+  'u': [['M28,52 L28,70 Q28,82 50,82 Q72,82 72,70 L72,52'],['M72,52 L72,80']],
+  'v': [['M28,52 L50,80'],['M72,52 L50,80']],
+  'w': [['M18,52 L34,80'],['M34,80 L50,60'],['M50,60 L66,80'],['M66,80 L82,52']],
+  'x': [['M28,52 L72,80'],['M72,52 L28,80']],
+  'y': [['M28,52 L50,76'],['M72,52 L32,100']],
+  'z': [['M28,52 L72,52'],['M72,52 L28,80'],['M28,80 L72,80']],
+  'ä': [['M68,52 Q50,40 34,52 Q20,62 34,72 Q50,82 68,70 L68,52'],['M68,52 L68,80'],['M36,38 L36,38'],['M60,38 L60,38']],
+  'ö': [['M50,40 Q26,40 22,60 Q18,80 42,84 Q66,88 74,68 Q80,50 64,44 Q56,40 50,40'],['M35,30 L35,30'],['M60,30 L60,30']],
+  'ü': [['M28,52 L28,70 Q28,82 50,82 Q72,82 72,70 L72,52'],['M72,52 L72,80'],['M34,40 L34,40'],['M64,40 L64,40']],
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let mode         = 'upper';
+let letters      = UPPER;
+let idx          = 0;
+let doneSet      = new Set();
+let strokes      = [];
+let drawing      = false;
+let curStroke    = [];
+let animRunning  = false;
+
+const SK_UP = 'buch3_done_upper';
+const SK_LO = 'buch3_done_lower';
+
+function loadProg() {
+  try {
+    return {
+      upper: new Set(JSON.parse(localStorage.getItem(SK_UP)||'[]')),
+      lower: new Set(JSON.parse(localStorage.getItem(SK_LO)||'[]')),
+    };
+  } catch(e) { return { upper: new Set(), lower: new Set() }; }
+}
+function saveProg() {
+  const k = mode==='upper' ? SK_UP : SK_LO;
+  try { localStorage.setItem(k, JSON.stringify([...doneSet])); } catch(e) {}
+}
+
+// ── CANVAS ────────────────────────────────────────────────────────────────────
+const canvas  = document.getElementById('draw-canvas');
+const ctx     = canvas.getContext('2d');
+const svgOver = document.getElementById('stroke-svg');
+
+// Size canvas to its CSS pixel size (reads wrapper since canvas is position:absolute)
+function sizeCanvas() {
+  const wrap = document.getElementById('canvas-wrap');
+  const w = wrap.offsetWidth;
+  const h = wrap.offsetHeight;
+  if (w < 10 || h < 10) return; // not yet laid out
+  if (canvas.width !== w || canvas.height !== h) {
+    canvas.width  = w;
+    canvas.height = h;
+  }
+  drawGhostAndLines();
+}
+
+// Draw ruling lines + ghost letter onto the canvas
+function drawGhostAndLines() {
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  // 3 ruling lines — all solid and equally visible
+  const lineYs = [h*0.2, h*0.5, h*0.8];
+  lineYs.forEach((y, i) => {
+    ctx.save();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = 'rgba(99,102,241,0.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, y); ctx.lineTo(w, y);
+    ctx.stroke();
+    ctx.restore();
+  });
+
+  // Ghost letter — drawn from STROKES paths so it matches the guide SVG exactly
+  const letter = letters[idx];
+  const defs = STROKES[letter] || [];
+  if (defs.length > 0) {
+    ctx.save();
+    // Uniform scale: canvas is square, viewBox is 100×100 — no distortion
+    const pad = 0.08;
+    const size = Math.min(w, h); // always equal since canvas is square
+    const scale = size * (1 - pad * 2) / 100;
+    const offsetX = (w - size * (1 - pad * 2)) / 2;
+    const offsetY = (h - size * (1 - pad * 2)) / 2;
+    ctx.translate(offsetX, offsetY);
+    ctx.scale(scale, scale);
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    defs.forEach(stroke => {
+      const sp2 = stroke[0].trim().split(' '); const isDot = sp2.length === 2 && sp2[1].replace('L','M') === sp2[0];
+      ctx.strokeStyle = 'rgba(99,102,241,0.13)';
+      ctx.lineWidth = (isDot ? 13 : 7) / scale;
+      const p = new Path2D(stroke[0]);
+      ctx.stroke(p);
+    });
+    ctx.restore();
+  }
+
+  // Redraw user strokes on top
+  drawStrokes();
+}
+
+function drawStrokes() {
+  ctx.save();
+  ctx.strokeStyle = '#4338CA';
+  ctx.lineWidth = 5;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  strokes.forEach(st => {
+    if (st.length < 2) return;
+    ctx.beginPath();
+    ctx.moveTo(st[0].x, st[0].y);
+    for (let i = 1; i < st.length; i++) ctx.lineTo(st[i].x, st[i].y);
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function getPos(e) {
+  const r   = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  return { x: src.clientX - r.left, y: src.clientY - r.top };
+}
+
+canvas.addEventListener('mousedown', e => {
+  drawing = true;
+  const p = getPos(e); curStroke = [p];
+  ctx.save(); ctx.strokeStyle='#4338CA'; ctx.lineWidth=5; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(p.x, p.y);
+});
+canvas.addEventListener('mousemove', e => {
+  if (!drawing) return;
+  const p = getPos(e); curStroke.push(p);
+  ctx.lineTo(p.x, p.y); ctx.stroke();
+});
+canvas.addEventListener('mouseup', () => {
+  if (!drawing) return; drawing = false; strokes.push([...curStroke]); curStroke = []; ctx.restore();
+});
+canvas.addEventListener('mouseleave', () => {
+  if (!drawing) return; drawing = false; strokes.push([...curStroke]); curStroke = []; ctx.restore();
+});
+
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault(); drawing = true;
+  const p = getPos(e); curStroke = [p];
+  ctx.save(); ctx.strokeStyle='#4338CA'; ctx.lineWidth=5; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(p.x, p.y);
+}, {passive:false});
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault(); if (!drawing) return;
+  const p = getPos(e); curStroke.push(p); ctx.lineTo(p.x, p.y); ctx.stroke();
+}, {passive:false});
+canvas.addEventListener('touchend', e => {
+  e.preventDefault(); if (!drawing) return;
+  drawing = false; strokes.push([...curStroke]); curStroke = []; ctx.restore();
+}, {passive:false});
+
+function clear() {
+  strokes = [];
+  drawGhostAndLines();
+  hideAnim();
+  setFeedback('','');
+}
+function undo() {
+  strokes.pop();
+  drawGhostAndLines();
+}
+
+// ── STROKE ANIMATION ──────────────────────────────────────────────────────────
+const COLORS = ['#EF4444','#F59E0B','#10B981','#6366F1','#EC4899'];
+
+function showAnim() {
+  if (animRunning) return;
+  animRunning = true;
+  hideAnim();
+  const letter = letters[idx];
+  const defs   = STROKES[letter] || [['M20,10 L80,90']];
+  svgOver.setAttribute('viewBox','0 0 100 100');
+  svgOver.setAttribute('preserveAspectRatio','xMidYMid meet');
+  svgOver.innerHTML = '';
+  svgOver.classList.add('visible');
+
+  function step(si) {
+    if (si >= defs.length) { animRunning = false; return; }
+    const d     = defs[si][0];
+    const color = COLORS[si % COLORS.length];
+
+    // Start circle + number
+    const m = d.match(/M([\d.]+),([\d.]+)/);
+    if (m) {
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx', m[1]); c.setAttribute('cy', m[2]);
+      c.setAttribute('r','5'); c.setAttribute('fill', color);
+      svgOver.appendChild(c);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', m[1]); t.setAttribute('y', parseFloat(m[2])+3);
+      t.setAttribute('text-anchor','middle'); t.setAttribute('fill','white');
+      t.setAttribute('font-size','5'); t.setAttribute('font-weight','bold');
+      t.textContent = si+1; svgOver.appendChild(t);
+    }
+
+    // Animated path
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', d); path.setAttribute('fill','none');
+    const parts = d.trim().split(' '); const isDot = parts.length === 2 && parts[0] === parts[1].replace('L','M');
+    path.setAttribute('stroke', color); path.setAttribute('stroke-width', isDot ? '6' : '3');
+    path.setAttribute('stroke-linecap','round'); path.setAttribute('stroke-linejoin','round');
+    const L = 300;
+    path.style.strokeDasharray = L; path.style.strokeDashoffset = L;
+    path.style.transition = 'stroke-dashoffset 0.6s ease-in-out';
+    svgOver.appendChild(path);
+    requestAnimationFrame(() => requestAnimationFrame(() => { path.style.strokeDashoffset = 0; }));
+    setTimeout(() => step(si+1), 800);
+  }
+  step(0);
+}
+
+// Render the guide-big box as SVG from STROKES paths
+function renderGuideSVG(letter) {
+  const defs = STROKES[letter] || [];
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('viewBox', '0 0 100 100');
+  svg.setAttribute('xmlns', ns);
+  defs.forEach(stroke => {
+    const path = document.createElementNS(ns, 'path');
+    path.setAttribute('d', stroke[0]);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', '#4338CA');
+    const sp = stroke[0].trim().split(' '); const isDot = sp.length === 2 && sp[1].replace('L','M') === sp[0];
+    path.setAttribute('stroke-width', isDot ? '14' : '8');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    svg.appendChild(path);
+  });
+  const el = document.getElementById('guide-big');
+  el.innerHTML = '';
+  el.appendChild(svg);
+}
+
+
+function hideAnim() {
+  svgOver.classList.remove('visible');
+  svgOver.innerHTML = '';
+  animRunning = false;
+}
+
+// ── CHECK ─────────────────────────────────────────────────────────────────────
+function checkDone() {
+  const pts = strokes.reduce((s, st) => s + st.length, 0);
+  if (pts < 8) {
+    setFeedback('', 'Noch einmal versuchen! 💪');
+    document.getElementById('feedback-msg').style.color = '#EF4444';
+    return;
+  }
+  let stars, msg;
+  if (pts >= 80)      { stars='⭐⭐⭐'; msg='Super gemacht!'; }
+  else if (pts >= 30) { stars='⭐⭐';  msg='Gut gemacht!'; }
+  else                { stars='⭐';    msg='Weiter üben!'; }
+  setFeedback(stars, msg);
+  document.getElementById('feedback-msg').style.color = '#4338CA';
+  if (pts >= 30) {
+    doneSet.add(letters[idx]);
+    saveProg();
+    refreshLetterBar();
+    buildProg();
+    if (pts >= 80) confetti();
+    setTimeout(nextLetter, 1300);
+  }
+}
+
+function setFeedback(stars, msg) {
+  document.getElementById('feedback-stars').textContent = stars;
+  document.getElementById('feedback-msg').textContent   = msg;
+}
+
+function nextLetter() {
+  selectIdx((idx + 1) % letters.length);
+}
+
+// ── LETTER SELECT ─────────────────────────────────────────────────────────────
+function selectIdx(newIdx) {
+  idx = newIdx;
+  // Update guide card
+  const letter = letters[idx];
+  renderGuideSVG(letter);
+  document.getElementById('guide-name').textContent = 'Buchstabe ' + letter;
+  document.getElementById('guide-tip').textContent  = TIPS[letter] || 'Schreibe den Buchstaben nach.';
+  // Clear canvas (redraws ghost with new letter)
+  strokes = [];
+  hideAnim();
+  setFeedback('','');
+  drawGhostAndLines();
+  // Update button highlights
+  refreshLetterBar();
+  buildProg();
+}
+
+function setCase(c) {
+  mode    = c;
+  letters = c === 'upper' ? UPPER : LOWER;
+  document.getElementById('btn-upper').classList.toggle('active', c==='upper');
+  document.getElementById('btn-lower').classList.toggle('active', c==='lower');
+  const prog = loadProg();
+  doneSet = c==='upper' ? prog.upper : prog.lower;
+  buildLetterBar();
+  selectIdx(0);
+}
+
+function buildLetterBar() {
+  const bar = document.getElementById('letter-bar');
+  bar.innerHTML = '';
+  letters.forEach((l, i) => {
+    const btn = document.createElement('button');
+    const special = ['Ä','Ö','Ü','ß','ä','ö','ü'].includes(l);
+    btn.className = 'lbtn' + (special ? ' special' : '');
+    btn.textContent = l;
+    btn.onclick = () => selectIdx(i);
+    bar.appendChild(btn);
+  });
+  refreshLetterBar();
+}
+
+function refreshLetterBar() {
+  document.querySelectorAll('.lbtn').forEach((btn, i) => {
+    btn.classList.toggle('active', i === idx);
+    btn.classList.toggle('done',   doneSet.has(letters[i]) && i !== idx);
+  });
+}
+
+function buildProg() {
+  const row = document.getElementById('prog-row');
+  row.innerHTML = '';
+  letters.forEach((l, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'pdot' + (doneSet.has(l) ? ' done' : '') + (i===idx ? ' current' : '');
+    dot.textContent = l;
+    dot.onclick = () => selectIdx(i);
+    row.appendChild(dot);
+  });
+  document.getElementById('prog-label').textContent =
+    `Fortschritt: ${doneSet.size} / ${letters.length}`;
+}
+
+// ── CONFETTI ──────────────────────────────────────────────────────────────────
+function confetti() {
+  const cc = document.getElementById('confetti-canvas');
+  cc.style.display = 'block';
+  cc.width  = window.innerWidth;
+  cc.height = window.innerHeight;
+  const cx = cc.getContext('2d');
+  const ps = Array.from({length:65}, () => ({
+    x: Math.random()*cc.width, y: -12,
+    w: 7+Math.random()*8, h: 4+Math.random()*4,
+    c: ['#4338CA','#EC4899','#F59E0B','#10B981','#EF4444'][Math.floor(Math.random()*5)],
+    vx:(Math.random()-.5)*4, vy:2+Math.random()*3,
+    a:Math.random()*360, va:(Math.random()-.5)*6,
+  }));
+  let f = 0;
+  (function tick() {
+    cx.clearRect(0,0,cc.width,cc.height);
+    ps.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy; p.a+=p.va;
+      cx.save(); cx.translate(p.x,p.y); cx.rotate(p.a*Math.PI/180);
+      cx.fillStyle=p.c; cx.fillRect(-p.w/2,-p.h/2,p.w,p.h); cx.restore();
+    });
+    if(++f<85) requestAnimationFrame(tick);
+    else { cx.clearRect(0,0,cc.width,cc.height); cc.style.display='none'; }
+  })();
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+(function init() {
+  const prog = loadProg();
+  doneSet = prog.upper;
+  buildLetterBar();
+  buildProg();
+  // Wait for layout, then size canvas and draw
+  requestAnimationFrame(() => {
+    sizeCanvas();
+    selectIdx(0);
+  });
+  window.addEventListener('resize', () => { sizeCanvas(); });
+})();
+</script>
+</body>
+</html>
