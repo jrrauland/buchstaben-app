@@ -923,31 +923,86 @@ function undo() {
 
 // ── AUDIO ─────────────────────────────────────────────────────────────────────
 // Map letters to full German names so TTS pronounces them correctly
-// Phonetic spellings tuned for German TTS engines.
-// German letter names — same for upper and lowercase.
-// "-eh" endings get anglicised to "ay" by many TTS engines, so we use
-// doubled/extended vowels that read correctly in de-DE (ee, ie, oo, uu…).
-const LETTER_NAMES = {
-  'A':'ah',    'B':'beh',   'C':'tseh',  'D':'deh',   'E':'eh',
-  'F':'ef',    'G':'geh',   'H':'hah',   'I':'ih',    'J':'yot',
-  'K':'kah',   'L':'el',    'M':'em',    'N':'en',    'O':'oh',
-  'P':'peh',   'Q':'ku',    'R':'er',    'S':'es',    'T':'teh',
-  'U':'uh',    'V':'fau',   'W':'weh',   'X':'iks',   'Y':'ypsilon',
-  'Z':'tsett',
-  'Ä':'äh',    'Ö':'öh',    'Ü':'üh',    'ß':'eszett',
+// Direct URLs to German letter audio files.
+// Upper and lowercase share the same pronunciation.
+const AUDIO_FILES = {
+  'A':'https://emmalovesgerman.com/wp-content/uploads/2021/10/a-2.mp3',
+  'B':'https://emmalovesgerman.com/wp-content/uploads/2021/10/b.mp3',
+  'C':'https://emmalovesgerman.com/wp-content/uploads/2021/10/c.mp3',
+  'D':'https://emmalovesgerman.com/wp-content/uploads/2021/10/d.mp3',
+  'E':'https://emmalovesgerman.com/wp-content/uploads/2021/10/e.mp3',
+  'F':'https://emmalovesgerman.com/wp-content/uploads/2021/10/f.mp3',
+  'G':'https://emmalovesgerman.com/wp-content/uploads/2021/10/g.mp3',
+  'H':'https://emmalovesgerman.com/wp-content/uploads/2021/10/h.mp3',
+  'I':'https://emmalovesgerman.com/wp-content/uploads/2021/10/i.mp3',
+  'J':'https://emmalovesgerman.com/wp-content/uploads/2021/10/j.mp3',
+  'K':'https://emmalovesgerman.com/wp-content/uploads/2021/10/k.mp3',
+  'L':'https://emmalovesgerman.com/wp-content/uploads/2021/10/l.mp3',
+  'M':'https://emmalovesgerman.com/wp-content/uploads/2021/10/m.mp3',
+  'N':'https://emmalovesgerman.com/wp-content/uploads/2021/10/n.mp3',
+  'O':'https://emmalovesgerman.com/wp-content/uploads/2021/10/o.mp3',
+  'P':'https://emmalovesgerman.com/wp-content/uploads/2021/10/p.mp3',
+  'Q':'https://emmalovesgerman.com/wp-content/uploads/2021/10/q.mp3',
+  'R':'https://emmalovesgerman.com/wp-content/uploads/2021/10/r.mp3',
+  'S':'https://emmalovesgerman.com/wp-content/uploads/2021/10/s.mp3',
+  'T':'https://emmalovesgerman.com/wp-content/uploads/2021/10/t.mp3',
+  'U':'https://emmalovesgerman.com/wp-content/uploads/2021/10/u.mp3',
+  'V':'https://emmalovesgerman.com/wp-content/uploads/2021/10/v.mp3',
+  'W':'https://emmalovesgerman.com/wp-content/uploads/2021/10/w.mp3',
+  'X':'https://emmalovesgerman.com/wp-content/uploads/2021/10/x.mp3',
+  'Y':'https://emmalovesgerman.com/wp-content/uploads/2021/10/y.mp3',
+  'Z':'https://emmalovesgerman.com/wp-content/uploads/2021/10/z.mp3',
+  'Ä':'https://emmalovesgerman.com/wp-content/uploads/2021/10/a-3.mp3',
+  'Ö':'https://emmalovesgerman.com/wp-content/uploads/2021/10/o-1.mp3',
+  'Ü':'https://emmalovesgerman.com/wp-content/uploads/2021/10/u-1.mp3',
+  'ß':'https://emmalovesgerman.com/wp-content/uploads/2021/10/s-1.mp3',
 };
+
+// TTS fallback phonetics (used only if the MP3 file is missing/fails)
+const LETTER_NAMES = {
+  'A':'ah','B':'be','C':'ceh','D':'dä','E':'eh','F':'ef','G':'ge',
+  'H':'hah','I':'i','J':'yot','K':'kah','L':'el','M':'em','N':'en',
+  'O':'oh','P':'pä','Q':'ku','R':'er','S':'es','T':'te','U':'uh',
+  'V':'fau','W':'we','X':'iks','Y':'ypsilon','Z':'tsett',
+  'Ä':'äh','Ö':'öh','Ü':'üh','ß':'eszett',
+};
+
+let _currentAudio = null;
 
 function speakLetter(letter) {
   if (!settings.audioEnabled) return;
+
+  // Stop anything currently playing
+  if (_currentAudio) { _currentAudio.pause(); _currentAudio = null; }
+
+  // Look up the filename using uppercase key
+  const key      = letter.toUpperCase();
+  const filename = AUDIO_FILES[key] || AUDIO_FILES[letter];
+
+  if (filename) {
+    const audio = new Audio(filename);
+    _currentAudio = audio;
+    audio.play().catch(() => {
+      // File missing or blocked — fall back to TTS
+      _currentAudio = null;
+      speakWithTTS(letter);
+    });
+    audio.onended = () => { _currentAudio = null; };
+  } else {
+    speakWithTTS(letter);
+  }
+}
+
+function speakWithTTS(letter) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
-  const text = LETTER_NAMES[letter.toUpperCase()] || LETTER_NAMES[letter] || letter;
+  const key  = letter.toUpperCase();
+  const text = LETTER_NAMES[key] || LETTER_NAMES[letter] || letter;
   function doSpeak() {
     const utt = new SpeechSynthesisUtterance(text);
     utt.lang  = 'de-DE';
-    utt.rate  = 0.65;   // slow enough to be clear for children
+    utt.rate  = 0.65;
     utt.pitch = 1;
-    // Prefer a German voice; fall back to whatever is available
     const voices  = window.speechSynthesis.getVoices();
     const deVoice = voices.find(v => v.lang === 'de-DE') ||
                     voices.find(v => v.lang.startsWith('de'));
@@ -1111,6 +1166,83 @@ function checkSequenceMatch() {
 }
 
 // ── CHECK ─────────────────────────────────────────────────────────────────────
+// Render the reference letter strokes onto an offscreen canvas and return
+// its ImageData so we can compare it to what the user drew.
+function renderReferenceToCanvas(size) {
+  const off = document.createElement('canvas');
+  off.width = off.height = size;
+  const c = off.getContext('2d');
+  const letter = letters[idx];
+  const defs = STROKES[letter] || [];
+  const pad = 0.08;
+  const scale = size * (1 - pad * 2) / 100;
+  const offsetX = size * pad;
+  const offsetY = size * pad;
+  c.fillStyle = '#000000';
+  c.fillRect(0, 0, size, size);
+  c.strokeStyle = '#ffffff';
+  c.lineWidth = Math.max(6, size * 0.07);
+  c.lineCap = 'round';
+  c.lineJoin = 'round';
+  c.save();
+  c.translate(offsetX, offsetY);
+  c.scale(scale, scale);
+  defs.forEach(stroke => {
+    const p = new Path2D(stroke[0]);
+    c.stroke(p);
+  });
+  c.restore();
+  return c.getImageData(0, 0, size, size);
+}
+
+// Render the user's drawn strokes onto an offscreen canvas of the same size.
+function renderUserToCanvas(size) {
+  const off = document.createElement('canvas');
+  off.width = off.height = size;
+  const c = off.getContext('2d');
+  // Scale user strokes from the actual canvas size down to `size`
+  const scaleX = size / canvas.width;
+  const scaleY = size / canvas.height;
+  c.fillStyle = '#000000';
+  c.fillRect(0, 0, size, size);
+  c.strokeStyle = '#ffffff';
+  c.lineWidth = Math.max(6, size * 0.07);
+  c.lineCap = 'round';
+  c.lineJoin = 'round';
+  strokes.forEach(st => {
+    if (st.length < 2) return;
+    c.beginPath();
+    c.moveTo(st[0].x * scaleX, st[0].y * scaleY);
+    for (let i = 1; i < st.length; i++) {
+      c.lineTo(st[i].x * scaleX, st[i].y * scaleY);
+    }
+    c.stroke();
+  });
+  return c.getImageData(0, 0, size, size);
+}
+
+// Compare two ImageData objects pixel by pixel.
+// Returns a similarity score 0–1: fraction of reference pixels that
+// are also lit in the user drawing (recall), weighted with precision
+// to penalise scribbles that cover everything.
+function imageSimilarity(refData, userData) {
+  const len = refData.data.length;
+  const THRESH = 80; // brightness threshold to count as "lit"
+  let refLit = 0, overlap = 0, userLit = 0;
+  for (let i = 0; i < len; i += 4) {
+    const rBright = refData.data[i]  > THRESH;
+    const uBright = userData.data[i] > THRESH;
+    if (rBright) refLit++;
+    if (uBright) userLit++;
+    if (rBright && uBright) overlap++;
+  }
+  if (refLit === 0) return 0;
+  const recall    = overlap / refLit;             // did they hit the reference?
+  const precision = userLit > 0 ? overlap / userLit : 0; // did they stay on target?
+  // F1-style harmonic mean, weighted slightly toward recall
+  return recall * 0.6 + precision * 0.4;
+}
+
 function checkDone() {
   const pts = strokes.reduce((s, st) => s + st.length, 0);
   if (pts < 8) {
@@ -1129,20 +1261,30 @@ function checkDone() {
     }
   }
 
+  // Shape similarity check
+  const SIZE = 80; // offscreen canvas size for comparison
+  const refImg  = renderReferenceToCanvas(SIZE);
+  const userImg = renderUserToCanvas(SIZE);
+  const score   = imageSimilarity(refImg, userImg); // 0.0 – 1.0
+
   let stars, msg;
-  if (pts >= 80)      { stars='⭐⭐⭐'; msg='Super gemacht!'; }
-  else if (pts >= 30) { stars='⭐⭐';  msg='Gut gemacht!'; }
-  else                { stars='⭐';    msg='Weiter üben!'; }
+  if (score >= 0.55)      { stars = '⭐⭐⭐'; msg = 'Super gemacht!'; }
+  else if (score >= 0.35) { stars = '⭐⭐';  msg = 'Gut gemacht!'; }
+  else if (score >= 0.18) { stars = '⭐';    msg = 'Weiter üben!'; }
+  else {
+    setFeedback('', 'Das sieht noch nicht richtig aus – versuch es nochmal! ✏️');
+    document.getElementById('feedback-msg').style.color = '#EF4444';
+    return;
+  }
+
   setFeedback(stars, msg);
   document.getElementById('feedback-msg').style.color = '#4338CA';
-  if (pts >= 30) {
-    doneSet.add(letters[idx]);
-    saveProg();
-    refreshLetterBar();
-    buildProg();
-    if (pts >= 80) confetti();
-    setTimeout(nextLetter, 1300);
-  }
+  doneSet.add(letters[idx]);
+  saveProg();
+  refreshLetterBar();
+  buildProg();
+  if (score >= 0.55) confetti();
+  setTimeout(nextLetter, 1300);
 }
 
 function setFeedback(stars, msg) {
