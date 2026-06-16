@@ -23,6 +23,7 @@ html, body {
   padding: 8px 14px;
   display: flex; align-items: center; justify-content: space-between;
 }
+#header-left { display: flex; align-items: center; gap: 10px; }
 #header-title { color: white; font-size: 16px; font-weight: 700; }
 #header-sub   { color: rgba(255,255,255,0.6); font-size: 10px; }
 #case-toggle  { display: flex; background: rgba(255,255,255,0.2); border-radius: 18px; overflow: hidden; }
@@ -31,6 +32,13 @@ html, body {
   color: rgba(255,255,255,0.65); border: none; background: transparent; cursor: pointer;
 }
 .case-btn.active { background: white; color: #4338CA; border-radius: 18px; }
+#settings-btn {
+  background: rgba(255,255,255,0.2); border: none; border-radius: 8px;
+  color: white; font-size: 18px; width: 34px; height: 34px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+#settings-btn:active { background: rgba(255,255,255,0.35); }
 
 /* LETTER BAR */
 #letter-bar {
@@ -91,19 +99,18 @@ html, body {
 }
 #anim-btn:active { background: #3730A3; }
 
-/* CANVAS AREA — square 1:1 so paths are not distorted */
+/* CANVAS AREA */
 #canvas-wrap {
   flex-shrink: 0;
   background: white;
   border-radius: 12px;
   border: 1px solid #C7D2FE;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   width: 100%;
   max-width: 320px;
   margin: 0 auto;
 }
-/* padding-bottom trick for 1:1 aspect ratio (works on all Android Chrome) */
 #canvas-wrap::after {
   content: '';
   display: block;
@@ -117,12 +124,17 @@ html, body {
   top: 0; left: 0;
   width: 100%;
   height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
 }
 #stroke-svg {
-  position: absolute; top: 0; left: 0;
-  width: 100%; height: 100%;
+  position: absolute;
+  top: -18px; left: -18px;
+  width: calc(100% + 36px);
+  height: calc(100% + 36px);
   pointer-events: none;
   opacity: 0; transition: opacity 0.25s;
+  overflow: visible;
 }
 #stroke-svg.visible { opacity: 1; }
 
@@ -166,23 +178,134 @@ html, body {
 
 /* CONFETTI */
 #confetti-canvas { position: fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:100; display:none; }
+
+/* ── SETTINGS PAGE ─────────────────────────────────────────────────────────── */
+#settings-page {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 12px 40px;
+  gap: 10px;
+  background: #EEF2FF;
+}
+#settings-page.visible { display: flex; }
+
+.settings-section {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #C7D2FE;
+}
+.settings-section-title {
+  font-size: 10px; font-weight: 700; color: #9CA3AF;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  padding: 8px 12px 4px;
+}
+.settings-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 12px;
+  border-top: 1px solid #F3F4F6;
+  gap: 10px;
+}
+.settings-row:first-of-type { border-top: none; }
+.settings-row-label { flex: 1; }
+.settings-row-label strong { display: block; font-size: 13px; font-weight: 700; color: #1F2937; }
+.settings-row-label span   { display: block; font-size: 11px; color: #9CA3AF; margin-top: 1px; line-height: 1.3; }
+
+/* Toggle switch */
+.toggle-wrap { position: relative; width: 44px; height: 26px; flex-shrink: 0; }
+.toggle-wrap input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-slider {
+  position: absolute; inset: 0;
+  background: #D1D5DB; border-radius: 13px;
+  cursor: pointer; transition: background 0.2s;
+}
+.toggle-slider::before {
+  content: ''; position: absolute;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: white; top: 3px; left: 3px;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-wrap input:checked + .toggle-slider { background: #4338CA; }
+.toggle-wrap input:checked + .toggle-slider::before { transform: translateX(18px); }
+
+/* Segment control (for 3-way options) */
+.seg-control {
+  display: flex; background: #F3F4F6; border-radius: 8px;
+  flex-shrink: 0;
+}
+.seg-btn {
+  padding: 5px 10px; font-size: 11px; font-weight: 700;
+  color: #6B7280; border: none; background: transparent; cursor: pointer;
+  transition: all 0.15s;
+}
+.seg-btn.active { background: #4338CA; color: white; border-radius: 7px; margin: 2px; padding: 3px 8px; }
+
+/* Danger button */
+.danger-btn {
+  width: 100%; padding: 12px;
+  background: #FEF2F2; border: 1.5px solid #FECACA;
+  border-radius: 10px; color: #DC2626;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  text-align: center;
+}
+.danger-btn:active { background: #FEE2E2; }
+
+/* Stats mini grid */
+#stats-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; padding: 4px 12px 12px;
+}
+.stat-box {
+  background: #F5F3FF; border-radius: 8px; padding: 8px;
+  text-align: center;
+}
+.stat-box .stat-num { font-size: 22px; font-weight: 800; color: #4338CA; }
+.stat-box .stat-lbl { font-size: 10px; color: #6B7280; margin-top: 1px; }
+
+/* Confirm modal */
+#modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45); z-index: 200;
+  align-items: center; justify-content: center;
+}
+#modal-overlay.visible { display: flex; }
+#modal-box {
+  background: white; border-radius: 16px;
+  padding: 20px; width: 280px; max-width: 90vw;
+  text-align: center;
+}
+#modal-box h3 { font-size: 16px; font-weight: 700; color: #1F2937; margin-bottom: 8px; }
+#modal-box p  { font-size: 13px; color: #6B7280; margin-bottom: 16px; line-height: 1.4; }
+#modal-btns   { display: flex; gap: 8px; }
+#modal-btns button { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; }
+#modal-cancel  { background: #F3F4F6; color: #374151; }
+#modal-confirm { background: #DC2626; color: white; }
 </style>
 </head>
 <body>
 
 <div id="header">
-  <div>
-    <div id="header-title">✏️ Buchstaben schreiben</div>
-    <div id="header-sub">Deutsche Druckschrift</div>
+  <div id="header-left">
+    <div>
+      <div id="header-title">✏️ Buchstaben schreiben</div>
+      <div id="header-sub">Deutsche Druckschrift</div>
+    </div>
   </div>
-  <div id="case-toggle">
-    <button class="case-btn active" id="btn-upper" onclick="setCase('upper')">ABC</button>
-    <button class="case-btn"        id="btn-lower" onclick="setCase('lower')">abc</button>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div id="case-toggle">
+      <button class="case-btn active" id="btn-upper" onclick="setCase('upper')">ABC</button>
+      <button class="case-btn"        id="btn-lower" onclick="setCase('lower')">abc</button>
+    </div>
+    <button id="settings-btn" onclick="toggleSettings()" title="Einstellungen">⚙️</button>
   </div>
 </div>
 
 <div id="letter-bar"></div>
 
+<!-- MAIN CONTENT -->
 <div id="content">
   <div id="guide-card">
     <div id="guide-big"></div>
@@ -200,7 +323,7 @@ html, body {
 
   <div id="toolbar">
     <button class="tbtn" onclick="undo()">↩ Rückgängig</button>
-    <button class="tbtn" onclick="clear()">🗑 Löschen</button>
+    <button class="tbtn" onclick="clearCanvas()">🗑 Löschen</button>
     <button class="tbtn go" onclick="checkDone()">⭐ Weiter</button>
   </div>
 
@@ -215,13 +338,145 @@ html, body {
   </div>
 </div>
 
+<!-- SETTINGS PAGE -->
+<div id="settings-page">
+
+  <div class="settings-section">
+    <div class="settings-section-title">📊 Statistiken</div>
+    <div id="stats-grid">
+      <div class="stat-box"><div class="stat-num" id="stat-upper">0</div><div class="stat-lbl">Großbuchstaben</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-lower">0</div><div class="stat-lbl">Kleinbuchstaben</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-total">0</div><div class="stat-lbl">Gesamt</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-pct">0%</div><div class="stat-lbl">Abgeschlossen</div></div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">🎓 Lernoptionen</div>
+
+    <div class="settings-row">
+      <div class="settings-row-label">
+        <strong>Reihenfolge prüfen</strong>
+        <span>Überprüft ob deine Strichreihenfolge mit der App übereinstimmt</span>
+      </div>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="toggle-sequence" onchange="saveSetting('checkSequence', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-row-label">
+        <strong>Hilfslinien</strong>
+        <span>Grund-, Mittel- und Oberlinie auf der Schreibfläche anzeigen</span>
+      </div>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="toggle-guidelines" onchange="onGuidelinesChange(this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-row-label">
+        <strong>Lautvorlesung</strong>
+        <span>Buchstabe wird beim Auswählen vorgelesen</span>
+      </div>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="toggle-audio" onchange="saveSetting('audioEnabled', this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-row-label">
+        <strong>Statistiken anzeigen</strong>
+        <span>Fortschrittsleiste auf der Hauptseite einblenden</span>
+      </div>
+      <label class="toggle-wrap">
+        <input type="checkbox" id="toggle-showstats" onchange="onShowStatsChange(this.checked)">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">⚡ Animationsgeschwindigkeit</div>
+    <div class="settings-row">
+      <div class="settings-row-label">
+        <strong>Schreibtempo</strong>
+        <span>Wie schnell die Strichanimation abgespielt wird</span>
+      </div>
+      <div class="seg-control" id="seg-speed">
+        <button class="seg-btn" onclick="setSpeed('slow')">Langsam</button>
+        <button class="seg-btn active" onclick="setSpeed('normal')">Normal</button>
+        <button class="seg-btn" onclick="setSpeed('fast')">Schnell</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">🎨 Erscheinungsbild</div>
+    <div class="settings-row">
+      <div class="settings-row-label">
+        <strong>Farbschema</strong>
+        <span>Hintergrundstil der Schreibfläche</span>
+      </div>
+      <div class="seg-control" id="seg-theme">
+        <button class="seg-btn active" onclick="setTheme('plain')">Weiß</button>
+        <button class="seg-btn" onclick="setTheme('lined')">Liniert</button>
+        <button class="seg-btn" onclick="setTheme('chalk')">Tafel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">📝 Buchstabengruppen</div>
+    <div class="settings-row" style="flex-wrap:wrap;gap:8px;">
+      <div class="settings-row-label">
+        <strong>Welche Buchstaben üben?</strong>
+        <span>Aktiviere oder deaktiviere Gruppen</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;padding:0 12px 12px;flex-wrap:wrap;">
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#374151;cursor:pointer;">
+        <input type="checkbox" id="grp-az" onchange="onGroupChange()" style="accent-color:#4338CA;width:16px;height:16px;"> A–Z
+      </label>
+      <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:#374151;cursor:pointer;">
+        <input type="checkbox" id="grp-umlaut" onchange="onGroupChange()" style="accent-color:#4338CA;width:16px;height:16px;"> Ä Ö Ü ß
+      </label>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">⚠️ Daten</div>
+    <div style="padding:10px 12px;">
+      <button class="danger-btn" onclick="confirmReset()">🗑 Fortschritt zurücksetzen</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Confirm Modal -->
+<div id="modal-overlay">
+  <div id="modal-box">
+    <h3>Fortschritt zurücksetzen?</h3>
+    <p>Alle gespeicherten Fortschritte für Groß- und Kleinbuchstaben werden gelöscht. Dies kann nicht rückgängig gemacht werden.</p>
+    <div id="modal-btns">
+      <button id="modal-cancel" onclick="closeModal()">Abbrechen</button>
+      <button id="modal-confirm" onclick="doReset()">Zurücksetzen</button>
+    </div>
+  </div>
+</div>
+
 <canvas id="confetti-canvas"></canvas>
 
 <script>
 // ── DATA ─────────────────────────────────────────────────────────────────────
 
-const UPPER = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','Ä','Ö','Ü','ß'];
-const LOWER = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','ä','ö','ü','ß'];
+const ALL_UPPER   = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'];
+const UMLAUTS_UP  = ['Ä','Ö','Ü','ß'];
+const ALL_LOWER   = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+const UMLAUTS_LO  = ['ä','ö','ü','ß'];
 
 const TIPS = {
   'A':'Zwei Schrägstriche von oben nach unten. Dann ein Querbalken in der Mitte.',
@@ -285,11 +540,7 @@ const TIPS = {
   'ü':'Wie u – zwei Punkte oben.',
 };
 
-// Stroke paths: viewBox 0 0 100 100
-// Ruling lines at y=20 (cap/ascender), y=50 (x-height), y=80 (baseline)
-// Uppercase/ascenders: y=20–80. x-height letters: y=50–80. Descenders: y=80–100.
 const STROKES = {
-  // ── UPPERCASE (y=20 top, y=80 baseline) ──
   'A': [['M50,20 L22,80'],['M50,20 L78,80'],['M32,55 L68,55']],
   'B': [['M25,20 L25,80'],['M25,20 Q65,20 65,38 Q65,50 25,50'],['M25,50 Q68,50 68,65 Q68,80 25,80']],
   'C': [['M75,28 Q50,16 30,32 Q14,50 30,68 Q50,84 75,74']],
@@ -308,65 +559,161 @@ const STROKES = {
   'P': [['M25,20 L25,80'],['M25,20 Q70,20 70,38 Q70,55 25,55']],
   'Q': [['M50,20 Q85,20 85,50 Q85,80 50,80 Q15,80 15,50 Q15,20 50,20'],['M62,68 L78,84']],
   'R': [['M25,20 L25,80'],['M25,20 Q70,20 70,38 Q70,55 25,55'],['M50,55 L76,80']],
-  'S': [['M74,28 Q48,14 32,32 Q20,50 55,54 Q82,58 76,72 Q66,86 34,80']],
+  'S': [['M74,28 Q48,14 32,32 Q20,50 55,54 Q82,58 76,72 Q64,86 42,84 Q28,82 24,74']],
   'T': [['M20,20 L80,20'],['M50,20 L50,80']],
   'U': [['M22,20 L22,62 Q22,82 50,82 Q78,82 78,62 L78,20']],
   'V': [['M18,20 L50,80'],['M82,20 L50,80']],
   'W': [['M12,20 L30,80'],['M30,80 L50,48'],['M50,48 L70,80'],['M70,80 L88,20']],
   'X': [['M20,20 L80,80'],['M80,20 L20,80']],
-  'Y': [['M18,20 L50,52'],['M82,20 L50,52'],['M50,52 L50,80']],
+  'Y': [['M18,20 L50,46'],['M82,20 L50,46'],['M50,46 L50,80']],
   'Z': [['M20,20 L80,20'],['M80,20 L20,80'],['M20,80 L80,80']],
   'Ä': [['M50,28 L22,80'],['M50,28 L78,80'],['M32,58 L68,58'],['M35,16 L35,16'],['M65,16 L65,16']],
   'Ö': [['M50,22 Q85,22 85,50 Q85,80 50,80 Q15,80 15,50 Q15,22 50,22'],['M35,14 L35,14'],['M65,14 L65,14']],
   'Ü': [['M22,22 L22,62 Q22,82 50,82 Q78,82 78,62 L78,22'],['M35,14 L35,14'],['M65,14 L65,14']],
   'ß': [['M32,90 L32,22 Q32,10 46,10 Q60,10 60,26 Q60,42 32,46'],['M32,46 Q66,48 66,64 Q66,80 50,82 Q42,82 38,76']],
-  // ── LOWERCASE ──
-  // tall/ascender letters: y=20 (ascender) to y=80 (baseline)
-  // normal letters: y=50 (x-height) to y=80 (baseline)
-  // descenders: go to y=100
-  'a': [['M68,52 Q50,40 34,52 Q20,62 34,72 Q50,82 68,70 L68,52'],['M68,52 L68,80']],
+  'a': [['M68,55 Q66,42 52,42 Q36,42 28,58 Q22,70 36,78 Q52,84 68,72 L68,55'],['M68,45 L68,78']],
   'b': [['M28,20 L28,80'],['M28,58 Q28,42 44,42 Q66,42 66,62 Q66,80 44,80 Q28,80 28,68']],
   'c': [['M66,56 Q50,40 34,54 Q20,66 34,76 Q50,86 66,74']],
   'd': [['M66,54 Q66,44 54,46 Q38,46 30,58 Q24,70 36,78 Q50,84 66,74 Z'],['M66,20 L66,80']],
   'e': [['M24,62 L66,62 Q66,44 50,40 Q30,36 22,56 Q16,72 34,80 Q52,88 68,76']],
-  'f': [['M64,24 Q50,14 44,28 L40,80'],['M30,52 L56,52']],
+  'f': [['M64,24 Q50,14 44,30 L44,80'],['M30,52 L58,52']],
   'g': [['M66,52 Q50,40 34,52 Q20,62 34,72 Q50,82 66,70 L66,52'],['M66,52 L66,90 Q66,100 44,100 Q30,100 26,90']],
   'h': [['M28,20 L28,80'],['M28,56 Q38,40 58,44 Q70,50 70,62 L70,80']],
   'i': [['M50,52 L50,80'],['M50,42 L50,42']],
   'j': [['M55,52 L55,88 Q55,98 36,98'],['M55,42 L55,42']],
-  'k': [['M28,20 L28,80'],['M62,46 L28,62'],['M28,62 L64,80']],
+  'k': [['M28,20 L28,80'],['M56,50 L28,62'],['M28,62 L58,80']],
   'l': [['M50,20 L50,80']],
   'm': [['M18,52 L18,80'],['M18,58 Q28,40 46,46 Q56,52 56,64 L56,80'],['M56,58 Q66,40 82,46 Q90,52 90,64 L90,80']],
   'n': [['M28,52 L28,80'],['M28,58 Q38,40 60,46 Q72,52 72,64 L72,80']],
-  'o': [['M50,40 Q26,40 22,60 Q18,80 42,84 Q66,88 74,68 Q80,50 64,44 Q56,40 50,40']],
-  'p': [['M30,52 L30,100'],['M30,62 Q46,42 64,50 Q76,60 74,72 Q68,84 46,84 Q30,84 30,70']],
-  'q': [['M50,40 Q26,40 20,60 Q14,78 38,86 Q60,90 66,72 Q68,58 58,48 Q52,40 50,40'],['M66,52 L66,100']],
-  'r': [['M28,52 L28,80'],['M28,58 Q40,40 64,46']],
-  's': [['M64,50 Q46,38 32,50 Q20,62 44,68 Q66,74 64,78 Q60,88 38,86 Q26,84 22,74']],
+  'o': [['M50,44 Q62,44 68,54 Q74,64 68,74 Q62,84 50,84 Q38,84 32,74 Q26,64 32,54 Q38,44 50,44']],
+  'p': [['M32,53 L32,105'],['M50,52 Q38,52 34,60 Q30,68 34,74 Q38,82 50,82 Q62,82 68,74 Q74,66 68,58 Q62,52 50,52']],
+  'q': [['M50,52 Q62,52 66,60 Q70,68 66,74 Q62,82 50,82 Q38,82 32,74 Q26,66 32,58 Q38,52 50,52'],['M68,53 L68,105']],
+  'r': [['M28,52 L28,80'],['M28,58 Q34,44 52,48']],
+  's': [['M60,52 Q60,42 48,42 Q36,42 36,52 Q36,60 48,64 Q60,68 60,76 Q60,84 48,84 Q36,84 36,76']],
   't': [['M50,22 L50,76 Q50,84 60,84'],['M32,52 L66,52']],
-  'u': [['M28,52 L28,70 Q28,82 50,82 Q72,82 72,70 L72,52'],['M72,52 L72,80']],
+  'u': [['M32,52 L32,70 Q32,82 50,82 Q68,82 68,70 L68,52'],['M68,52 L68,80']],
   'v': [['M28,52 L50,80'],['M72,52 L50,80']],
   'w': [['M18,52 L34,80'],['M34,80 L50,60'],['M50,60 L66,80'],['M66,80 L82,52']],
-  'x': [['M28,52 L72,80'],['M72,52 L28,80']],
+  'x': [['M40,52 L60,80'],['M60,52 L40,80']],
   'y': [['M28,52 L50,76'],['M72,52 L32,100']],
-  'z': [['M28,52 L72,52'],['M72,52 L28,80'],['M28,80 L72,80']],
-  'ä': [['M68,52 Q50,40 34,52 Q20,62 34,72 Q50,82 68,70 L68,52'],['M68,52 L68,80'],['M36,38 L36,38'],['M60,38 L60,38']],
-  'ö': [['M50,40 Q26,40 22,60 Q18,80 42,84 Q66,88 74,68 Q80,50 64,44 Q56,40 50,40'],['M35,30 L35,30'],['M60,30 L60,30']],
-  'ü': [['M28,52 L28,70 Q28,82 50,82 Q72,82 72,70 L72,52'],['M72,52 L72,80'],['M34,40 L34,40'],['M64,40 L64,40']],
+  'z': [['M32,52 L68,52'],['M68,52 L32,80'],['M32,80 L68,80']],
+  'ä': [['M68,55 Q66,42 52,42 Q36,42 28,58 Q22,70 36,78 Q52,84 68,72 L68,55'],['M68,45 L68,78'],['M36,36 L36,36'],['M60,36 L60,36']],
+  'ö': [['M50,44 Q62,44 68,54 Q74,64 68,74 Q62,84 50,84 Q38,84 32,74 Q26,64 32,54 Q38,44 50,44'],['M36,37 L36,37'],['M60,37 L60,37']],
+  'ü': [['M32,52 L32,70 Q32,82 50,82 Q68,82 68,70 L68,52'],['M68,52 L68,80'],['M36,42 L36,42'],['M60,42 L60,42']],
 };
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
-let mode         = 'upper';
-let letters      = UPPER;
-let idx          = 0;
-let doneSet      = new Set();
-let strokes      = [];
-let drawing      = false;
-let curStroke    = [];
-let animRunning  = false;
+// ── SETTINGS STATE ────────────────────────────────────────────────────────────
+const SETTINGS_KEY = 'buch3_settings';
+let settings = {
+  checkSequence: false,
+  guidelinesOn: true,
+  audioEnabled: false,
+  showStats: true,
+  animSpeed: 'normal',
+  theme: 'plain',
+  groupAZ: true,
+  groupUmlaut: true,
+};
+
+function loadSettings() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
+    Object.assign(settings, s);
+  } catch(e) {}
+}
+function saveSetting(key, val) {
+  settings[key] = val;
+  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch(e) {}
+}
+
+function applySettingsToUI() {
+  document.getElementById('toggle-sequence').checked  = settings.checkSequence;
+  document.getElementById('toggle-guidelines').checked = settings.guidelinesOn;
+  document.getElementById('toggle-audio').checked      = settings.audioEnabled;
+  document.getElementById('toggle-showstats').checked  = settings.showStats;
+  document.getElementById('grp-az').checked            = settings.groupAZ;
+  document.getElementById('grp-umlaut').checked        = settings.groupUmlaut;
+
+  // Speed segment
+  document.querySelectorAll('#seg-speed .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase().trim() === speedLabel(settings.animSpeed));
+  });
+  // Theme segment
+  document.querySelectorAll('#seg-theme .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase().trim() === themeLabel(settings.theme));
+  });
+  // Show/hide progress bar
+  document.getElementById('prog-wrap').style.display = settings.showStats ? '' : 'none';
+}
+
+function speedLabel(v) { return v === 'slow' ? 'langsam' : v === 'fast' ? 'schnell' : 'normal'; }
+function themeLabel(v)  { return v === 'lined' ? 'liniert' : v === 'chalk' ? 'tafel' : 'weiß'; }
+
+function setSpeed(v) {
+  saveSetting('animSpeed', v);
+  document.querySelectorAll('#seg-speed .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase().trim() === speedLabel(v));
+  });
+}
+
+function setTheme(v) {
+  saveSetting('theme', v);
+  document.querySelectorAll('#seg-theme .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.toLowerCase().trim() === themeLabel(v));
+  });
+  drawGhostAndLines();
+}
+
+function onGuidelinesChange(val) {
+  saveSetting('guidelinesOn', val);
+  drawGhostAndLines();
+}
+
+function onShowStatsChange(val) {
+  saveSetting('showStats', val);
+  document.getElementById('prog-wrap').style.display = val ? '' : 'none';
+}
+
+function onGroupChange() {
+  const az      = document.getElementById('grp-az').checked;
+  const umlaut  = document.getElementById('grp-umlaut').checked;
+  // At least one must stay on
+  if (!az && !umlaut) {
+    document.getElementById(az ? 'grp-az' : 'grp-umlaut').checked = true;
+    return;
+  }
+  saveSetting('groupAZ', az);
+  saveSetting('groupUmlaut', umlaut);
+  rebuildLetters();
+  buildLetterBar();
+  const prog = loadProg();
+  doneSet = mode === 'upper' ? prog.upper : prog.lower;
+  selectIdx(0, false);
+}
+
+// ── APP STATE ─────────────────────────────────────────────────────────────────
+let mode      = 'upper';
+let letters   = [];
+let idx       = 0;
+let doneSet   = new Set();
+let strokes   = [];
+let drawing   = false;
+let curStroke = [];
+let animRunning = false;
+let settingsOpen = false;
 
 const SK_UP = 'buch3_done_upper';
 const SK_LO = 'buch3_done_lower';
+
+function rebuildLetters() {
+  const base   = mode === 'upper' ? ALL_UPPER : ALL_LOWER;
+  const uml    = mode === 'upper' ? UMLAUTS_UP : UMLAUTS_LO;
+  let result = [];
+  if (settings.groupAZ)     result = result.concat(base);
+  if (settings.groupUmlaut) result = result.concat(uml);
+  // Remove duplicates (ß appears in both)
+  letters = [...new Set(result)];
+}
 
 function loadProg() {
   try {
@@ -381,17 +728,58 @@ function saveProg() {
   try { localStorage.setItem(k, JSON.stringify([...doneSet])); } catch(e) {}
 }
 
+// ── SETTINGS PANEL ────────────────────────────────────────────────────────────
+function toggleSettings() {
+  settingsOpen = !settingsOpen;
+  document.getElementById('settings-page').classList.toggle('visible', settingsOpen);
+  document.getElementById('content').style.display = settingsOpen ? 'none' : 'flex';
+  document.getElementById('letter-bar').style.display = settingsOpen ? 'none' : 'flex';
+  document.getElementById('settings-btn').textContent = settingsOpen ? '✕' : '⚙️';
+  if (settingsOpen) updateStats();
+}
+
+function updateStats() {
+  const prog = loadProg();
+  const up  = prog.upper.size;
+  const lo  = prog.lower.size;
+  const tot = up + lo;
+  const max = (ALL_UPPER.length + UMLAUTS_UP.length) + (ALL_LOWER.length + UMLAUTS_LO.length - 1); // ß shared
+  document.getElementById('stat-upper').textContent = up;
+  document.getElementById('stat-lower').textContent = lo;
+  document.getElementById('stat-total').textContent = tot;
+  document.getElementById('stat-pct').textContent   = Math.round(tot / max * 100) + '%';
+}
+
+// ── RESET ─────────────────────────────────────────────────────────────────────
+function confirmReset() {
+  document.getElementById('modal-overlay').classList.add('visible');
+}
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('visible');
+}
+function doReset() {
+  try {
+    localStorage.removeItem(SK_UP);
+    localStorage.removeItem(SK_LO);
+  } catch(e) {}
+  doneSet = new Set();
+  closeModal();
+  updateStats();
+  buildLetterBar();
+  buildProg();
+  setFeedback('', 'Fortschritt zurückgesetzt ✓');
+}
+
 // ── CANVAS ────────────────────────────────────────────────────────────────────
 const canvas  = document.getElementById('draw-canvas');
 const ctx     = canvas.getContext('2d');
 const svgOver = document.getElementById('stroke-svg');
 
-// Size canvas to its CSS pixel size (reads wrapper since canvas is position:absolute)
 function sizeCanvas() {
   const wrap = document.getElementById('canvas-wrap');
   const w = wrap.offsetWidth;
   const h = wrap.offsetHeight;
-  if (w < 10 || h < 10) return; // not yet laid out
+  if (w < 10 || h < 10) return;
   if (canvas.width !== w || canvas.height !== h) {
     canvas.width  = w;
     canvas.height = h;
@@ -399,33 +787,48 @@ function sizeCanvas() {
   drawGhostAndLines();
 }
 
-// Draw ruling lines + ghost letter onto the canvas
 function drawGhostAndLines() {
   const w = canvas.width;
   const h = canvas.height;
   ctx.clearRect(0, 0, w, h);
 
-  // 3 ruling lines — all solid and equally visible
-  const lineYs = [h*0.2, h*0.5, h*0.8];
-  lineYs.forEach((y, i) => {
-    ctx.save();
-    ctx.setLineDash([]);
-    ctx.strokeStyle = 'rgba(99,102,241,0.35)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(0, y); ctx.lineTo(w, y);
-    ctx.stroke();
-    ctx.restore();
-  });
+  // Theme background
+  if (settings.theme === 'chalk') {
+    ctx.fillStyle = '#2D3748';
+    ctx.fillRect(0, 0, w, h);
+  } else if (settings.theme === 'lined') {
+    ctx.fillStyle = '#FFFDE7';
+    ctx.fillRect(0, 0, w, h);
+  }
 
-  // Ghost letter — drawn from STROKES paths so it matches the guide SVG exactly
+  // Ruling lines
+  if (settings.guidelinesOn) {
+    const lineYs = [h*0.2, h*0.5, h*0.8];
+    const lineColor = settings.theme === 'chalk'
+      ? 'rgba(255,255,255,0.2)'
+      : settings.theme === 'lined'
+        ? 'rgba(100,160,255,0.4)'
+        : 'rgba(99,102,241,0.35)';
+    lineYs.forEach(y => {
+      ctx.save();
+      ctx.setLineDash(settings.theme === 'lined' ? [8,6] : []);
+      ctx.strokeStyle = lineColor;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, y); ctx.lineTo(w, y);
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  // Ghost letter
   const letter = letters[idx];
+  if (!letter) return;
   const defs = STROKES[letter] || [];
   if (defs.length > 0) {
     ctx.save();
-    // Uniform scale: canvas is square, viewBox is 100×100 — no distortion
     const pad = 0.08;
-    const size = Math.min(w, h); // always equal since canvas is square
+    const size = Math.min(w, h);
     const scale = size * (1 - pad * 2) / 100;
     const offsetX = (w - size * (1 - pad * 2)) / 2;
     const offsetY = (h - size * (1 - pad * 2)) / 2;
@@ -434,8 +837,12 @@ function drawGhostAndLines() {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     defs.forEach(stroke => {
-      const sp2 = stroke[0].trim().split(' '); const isDot = sp2.length === 2 && sp2[1].replace('L','M') === sp2[0];
-      ctx.strokeStyle = 'rgba(99,102,241,0.13)';
+      const sp2 = stroke[0].trim().split(' ');
+      const isDot = sp2.length === 2 && sp2[1].replace('L','M') === sp2[0];
+      const ghostColor = settings.theme === 'chalk'
+        ? 'rgba(255,255,255,0.12)'
+        : 'rgba(99,102,241,0.13)';
+      ctx.strokeStyle = ghostColor;
       ctx.lineWidth = (isDot ? 13 : 7) / scale;
       const p = new Path2D(stroke[0]);
       ctx.stroke(p);
@@ -443,13 +850,13 @@ function drawGhostAndLines() {
     ctx.restore();
   }
 
-  // Redraw user strokes on top
   drawStrokes();
 }
 
 function drawStrokes() {
   ctx.save();
-  ctx.strokeStyle = '#4338CA';
+  const strokeColor = settings.theme === 'chalk' ? '#A5B4FC' : '#4338CA';
+  ctx.strokeStyle = strokeColor;
   ctx.lineWidth = 5;
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
@@ -472,7 +879,8 @@ function getPos(e) {
 canvas.addEventListener('mousedown', e => {
   drawing = true;
   const p = getPos(e); curStroke = [p];
-  ctx.save(); ctx.strokeStyle='#4338CA'; ctx.lineWidth=5; ctx.lineCap='round'; ctx.lineJoin='round';
+  const strokeColor = settings.theme === 'chalk' ? '#A5B4FC' : '#4338CA';
+  ctx.save(); ctx.strokeStyle=strokeColor; ctx.lineWidth=5; ctx.lineCap='round'; ctx.lineJoin='round';
   ctx.beginPath(); ctx.moveTo(p.x, p.y);
 });
 canvas.addEventListener('mousemove', e => {
@@ -486,11 +894,11 @@ canvas.addEventListener('mouseup', () => {
 canvas.addEventListener('mouseleave', () => {
   if (!drawing) return; drawing = false; strokes.push([...curStroke]); curStroke = []; ctx.restore();
 });
-
 canvas.addEventListener('touchstart', e => {
   e.preventDefault(); drawing = true;
   const p = getPos(e); curStroke = [p];
-  ctx.save(); ctx.strokeStyle='#4338CA'; ctx.lineWidth=5; ctx.lineCap='round'; ctx.lineJoin='round';
+  const strokeColor = settings.theme === 'chalk' ? '#A5B4FC' : '#4338CA';
+  ctx.save(); ctx.strokeStyle=strokeColor; ctx.lineWidth=5; ctx.lineCap='round'; ctx.lineJoin='round';
   ctx.beginPath(); ctx.moveTo(p.x, p.y);
 }, {passive:false});
 canvas.addEventListener('touchmove', e => {
@@ -502,7 +910,7 @@ canvas.addEventListener('touchend', e => {
   drawing = false; strokes.push([...curStroke]); curStroke = []; ctx.restore();
 }, {passive:false});
 
-function clear() {
+function clearCanvas() {
   strokes = [];
   drawGhostAndLines();
   hideAnim();
@@ -513,56 +921,117 @@ function undo() {
   drawGhostAndLines();
 }
 
+// ── AUDIO ─────────────────────────────────────────────────────────────────────
+// Map letters to full German names so TTS pronounces them correctly
+// Phonetic spellings tuned for German TTS engines.
+// German letter names — same for upper and lowercase.
+// "-eh" endings get anglicised to "ay" by many TTS engines, so we use
+// doubled/extended vowels that read correctly in de-DE (ee, ie, oo, uu…).
+const LETTER_NAMES = {
+  'A':'ah',    'B':'beh',   'C':'tseh',  'D':'deh',   'E':'eh',
+  'F':'ef',    'G':'geh',   'H':'hah',   'I':'ih',    'J':'yot',
+  'K':'kah',   'L':'el',    'M':'em',    'N':'en',    'O':'oh',
+  'P':'peh',   'Q':'ku',    'R':'er',    'S':'es',    'T':'teh',
+  'U':'uh',    'V':'fau',   'W':'weh',   'X':'iks',   'Y':'ypsilon',
+  'Z':'tsett',
+  'Ä':'äh',    'Ö':'öh',    'Ü':'üh',    'ß':'eszett',
+};
+
+function speakLetter(letter) {
+  if (!settings.audioEnabled) return;
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const text = LETTER_NAMES[letter.toUpperCase()] || LETTER_NAMES[letter] || letter;
+  function doSpeak() {
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang  = 'de-DE';
+    utt.rate  = 0.65;   // slow enough to be clear for children
+    utt.pitch = 1;
+    // Prefer a German voice; fall back to whatever is available
+    const voices  = window.speechSynthesis.getVoices();
+    const deVoice = voices.find(v => v.lang === 'de-DE') ||
+                    voices.find(v => v.lang.startsWith('de'));
+    if (deVoice) utt.voice = deVoice;
+    window.speechSynthesis.speak(utt);
+  }
+  if (window.speechSynthesis.getVoices().length > 0) {
+    doSpeak();
+  } else {
+    window.speechSynthesis.onvoiceschanged = () => {
+      window.speechSynthesis.onvoiceschanged = null;
+      doSpeak();
+    };
+  }
+}
+
 // ── STROKE ANIMATION ──────────────────────────────────────────────────────────
 const COLORS = ['#EF4444','#F59E0B','#10B981','#6366F1','#EC4899'];
+const SPEED_MS = { slow: 1400, normal: 800, fast: 350 };
 
 function showAnim() {
   if (animRunning) return;
   animRunning = true;
   hideAnim();
   const letter = letters[idx];
+  if (!letter) return;
   const defs   = STROKES[letter] || [['M20,10 L80,90']];
-  svgOver.setAttribute('viewBox','0 0 100 100');
+  svgOver.setAttribute('viewBox','-14 -14 128 128');
   svgOver.setAttribute('preserveAspectRatio','xMidYMid meet');
   svgOver.innerHTML = '';
   svgOver.classList.add('visible');
+
+  const stepMs = SPEED_MS[settings.animSpeed] || 800;
+
+  // Two layers: paths below, labels always on top
+  const pathLayer  = document.createElementNS('http://www.w3.org/2000/svg','g');
+  const labelLayer = document.createElementNS('http://www.w3.org/2000/svg','g');
+  svgOver.appendChild(pathLayer);
+  svgOver.appendChild(labelLayer);
 
   function step(si) {
     if (si >= defs.length) { animRunning = false; return; }
     const d     = defs[si][0];
     const color = COLORS[si % COLORS.length];
 
-    // Start circle + number
-    const m = d.match(/M([\d.]+),([\d.]+)/);
-    if (m) {
-      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      c.setAttribute('cx', m[1]); c.setAttribute('cy', m[2]);
-      c.setAttribute('r','5'); c.setAttribute('fill', color);
-      svgOver.appendChild(c);
-      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x', m[1]); t.setAttribute('y', parseFloat(m[2])+3);
-      t.setAttribute('text-anchor','middle'); t.setAttribute('fill','white');
-      t.setAttribute('font-size','5'); t.setAttribute('font-weight','bold');
-      t.textContent = si+1; svgOver.appendChild(t);
-    }
-
-    // Animated path
+    // Animated path goes into pathLayer (below labels)
     const path = document.createElementNS('http://www.w3.org/2000/svg','path');
     path.setAttribute('d', d); path.setAttribute('fill','none');
-    const parts = d.trim().split(' '); const isDot = parts.length === 2 && parts[0] === parts[1].replace('L','M');
+    const parts = d.trim().split(' ');
+    const isDot = parts.length === 2 && parts[0] === parts[1].replace('L','M');
     path.setAttribute('stroke', color); path.setAttribute('stroke-width', isDot ? '6' : '3');
     path.setAttribute('stroke-linecap','round'); path.setAttribute('stroke-linejoin','round');
     const L = 300;
+    const transDur = (stepMs * 0.75 / 1000).toFixed(2);
     path.style.strokeDasharray = L; path.style.strokeDashoffset = L;
-    path.style.transition = 'stroke-dashoffset 0.6s ease-in-out';
-    svgOver.appendChild(path);
+    path.style.transition = `stroke-dashoffset ${transDur}s ease-in-out`;
+    pathLayer.appendChild(path);
     requestAnimationFrame(() => requestAnimationFrame(() => { path.style.strokeDashoffset = 0; }));
-    setTimeout(() => step(si+1), 800);
+
+    // Label (circle + number) goes into labelLayer (always on top)
+    const m = d.match(/M([\d.]+),([\d.]+)/);
+    if (m) {
+      const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      c.setAttribute('cx', m[1]); c.setAttribute('cy', m[2]);
+      c.setAttribute('r','7'); c.setAttribute('fill', color);
+      c.setAttribute('stroke','white'); c.setAttribute('stroke-width','2');
+      g.appendChild(c);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+      t.setAttribute('x', m[1]); t.setAttribute('y', m[2]);
+      t.setAttribute('text-anchor','middle'); t.setAttribute('dominant-baseline','central');
+      t.setAttribute('fill','white');
+      t.setAttribute('font-size','7'); t.setAttribute('font-weight','bold');
+      t.setAttribute('font-family','sans-serif');
+      t.textContent = si + 1;
+      g.appendChild(t);
+      labelLayer.appendChild(g);
+    }
+
+    setTimeout(() => step(si+1), stepMs);
   }
   step(0);
 }
 
-// Render the guide-big box as SVG from STROKES paths
 function renderGuideSVG(letter) {
   const defs = STROKES[letter] || [];
   const ns = 'http://www.w3.org/2000/svg';
@@ -574,7 +1043,8 @@ function renderGuideSVG(letter) {
     path.setAttribute('d', stroke[0]);
     path.setAttribute('fill', 'none');
     path.setAttribute('stroke', '#4338CA');
-    const sp = stroke[0].trim().split(' '); const isDot = sp.length === 2 && sp[1].replace('L','M') === sp[0];
+    const sp = stroke[0].trim().split(' ');
+    const isDot = sp.length === 2 && sp[1].replace('L','M') === sp[0];
     path.setAttribute('stroke-width', isDot ? '14' : '8');
     path.setAttribute('stroke-linecap', 'round');
     path.setAttribute('stroke-linejoin', 'round');
@@ -585,11 +1055,59 @@ function renderGuideSVG(letter) {
   el.appendChild(svg);
 }
 
-
 function hideAnim() {
   svgOver.classList.remove('visible');
   svgOver.innerHTML = '';
   animRunning = false;
+}
+
+// ── SEQUENCE CHECK ────────────────────────────────────────────────────────────
+function getStrokeCenter(st) {
+  if (!st || st.length === 0) return {x:0, y:0};
+  const sx = st.reduce((a,p)=>a+p.x,0)/st.length;
+  const sy = st.reduce((a,p)=>a+p.y,0)/st.length;
+  return {x:sx, y:sy};
+}
+function getRefCenter(pathDef, canvasW, canvasH) {
+  // Sample a few points from the path by parsing M/L coordinates
+  const nums = pathDef.match(/[\d.]+,[\d.]+/g) || [];
+  if (!nums.length) return {x:50, y:50};
+  const pad = 0.08;
+  const size = Math.min(canvasW, canvasH);
+  const scale = size * (1 - pad * 2) / 100;
+  const offsetX = (canvasW - size * (1 - pad * 2)) / 2;
+  const offsetY = (canvasH - size * (1 - pad * 2)) / 2;
+  let sx=0, sy=0;
+  nums.forEach(n => {
+    const [x,y] = n.split(',').map(Number);
+    sx += x * scale + offsetX;
+    sy += y * scale + offsetY;
+  });
+  return { x: sx/nums.length, y: sy/nums.length };
+}
+
+function checkSequenceMatch() {
+  const letter = letters[idx];
+  const defs = STROKES[letter] || [];
+  if (strokes.length < defs.length) return true; // not enough strokes yet, skip
+  // For each user stroke, find the closest reference stroke
+  // Check they appear in the same order
+  const w = canvas.width, h = canvas.height;
+  const refCenters = defs.map(d => getRefCenter(d[0], w, h));
+  const userOrder = strokes.slice(0, defs.length).map(st => {
+    const uc = getStrokeCenter(st);
+    let bestIdx = 0, bestDist = Infinity;
+    refCenters.forEach((rc, ri) => {
+      const dist = Math.hypot(uc.x - rc.x, uc.y - rc.y);
+      if (dist < bestDist) { bestDist = dist; bestIdx = ri; }
+    });
+    return bestIdx;
+  });
+  // Check if userOrder is sorted (matches ref order)
+  for (let i = 1; i < userOrder.length; i++) {
+    if (userOrder[i] <= userOrder[i-1]) return false;
+  }
+  return true;
 }
 
 // ── CHECK ─────────────────────────────────────────────────────────────────────
@@ -600,6 +1118,17 @@ function checkDone() {
     document.getElementById('feedback-msg').style.color = '#EF4444';
     return;
   }
+
+  // Sequence check
+  if (settings.checkSequence) {
+    const seqOk = checkSequenceMatch();
+    if (!seqOk) {
+      setFeedback('', 'Reihenfolge nicht wie in der App – versuch es nochmal! 🔢');
+      document.getElementById('feedback-msg').style.color = '#F59E0B';
+      return;
+    }
+  }
+
   let stars, msg;
   if (pts >= 80)      { stars='⭐⭐⭐'; msg='Super gemacht!'; }
   else if (pts >= 30) { stars='⭐⭐';  msg='Gut gemacht!'; }
@@ -626,32 +1155,31 @@ function nextLetter() {
 }
 
 // ── LETTER SELECT ─────────────────────────────────────────────────────────────
-function selectIdx(newIdx) {
-  idx = newIdx;
-  // Update guide card
+function selectIdx(newIdx, speak = true) {
+  idx = Math.min(newIdx, letters.length - 1);
   const letter = letters[idx];
+  if (!letter) return;
+  if (speak) speakLetter(letter);
   renderGuideSVG(letter);
   document.getElementById('guide-name').textContent = 'Buchstabe ' + letter;
   document.getElementById('guide-tip').textContent  = TIPS[letter] || 'Schreibe den Buchstaben nach.';
-  // Clear canvas (redraws ghost with new letter)
   strokes = [];
   hideAnim();
   setFeedback('','');
   drawGhostAndLines();
-  // Update button highlights
   refreshLetterBar();
   buildProg();
 }
 
 function setCase(c) {
-  mode    = c;
-  letters = c === 'upper' ? UPPER : LOWER;
+  mode = c;
   document.getElementById('btn-upper').classList.toggle('active', c==='upper');
   document.getElementById('btn-lower').classList.toggle('active', c==='lower');
   const prog = loadProg();
   doneSet = c==='upper' ? prog.upper : prog.lower;
+  rebuildLetters();
   buildLetterBar();
-  selectIdx(0);
+  selectIdx(0, false);
 }
 
 function buildLetterBar() {
@@ -718,14 +1246,16 @@ function confetti() {
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 (function init() {
+  loadSettings();
+  rebuildLetters();
+  applySettingsToUI();
   const prog = loadProg();
   doneSet = prog.upper;
   buildLetterBar();
   buildProg();
-  // Wait for layout, then size canvas and draw
   requestAnimationFrame(() => {
     sizeCanvas();
-    selectIdx(0);
+    selectIdx(0, false);
   });
   window.addEventListener('resize', () => { sizeCanvas(); });
 })();
