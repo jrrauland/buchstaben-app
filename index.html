@@ -283,6 +283,151 @@ html, body {
 #modal-btns button { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; }
 #modal-cancel  { background: #F3F4F6; color: #374151; }
 #modal-confirm { background: #DC2626; color: white; }
+
+/* ── LETTER PICKER SCREEN ── */
+#picker-screen {
+  display: none; position: fixed; inset: 0; z-index: 140;
+  background: #EEF2FF;
+  flex-direction: column;
+}
+#picker-screen.visible { display: flex; }
+#picker-header {
+  background: #4338CA; color: white;
+  padding: 10px 12px 8px;
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+#picker-header-text { flex: 1; min-width: 0; }
+#picker-title { font-size: 15px; font-weight: 700; }
+#picker-sub   { font-size: 10px; opacity: 0.7; margin-top: 1px; }
+#picker-case-toggle {
+  display: flex; background: rgba(255,255,255,0.2); border-radius: 16px; overflow: hidden; flex-shrink: 0;
+}
+.picker-case-btn {
+  padding: 4px 11px; font-size: 12px; font-weight: 700;
+  color: rgba(255,255,255,0.65); border: none; background: transparent; cursor: pointer;
+}
+.picker-case-btn.active { background: white; color: #4338CA; border-radius: 16px; }
+#picker-count-badge {
+  background: rgba(255,255,255,0.2); border-radius: 99px;
+  padding: 4px 10px; font-size: 12px; font-weight: 800;
+  white-space: nowrap; flex-shrink: 0;
+}
+#picker-grid {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 10px; display: flex; flex-wrap: wrap; gap: 6px;
+  align-content: flex-start;
+}
+.plbtn {
+  width: calc(14.28% - 6px); aspect-ratio: 1;
+  border-radius: 8px; border: 1.5px solid #C7D2FE;
+  background: white; font-size: 14px; font-weight: 800; color: #4338CA;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s; position: relative;
+}
+.plbtn.selected {
+  background: #4338CA; color: white; border-color: #4338CA;
+  transform: scale(0.91);
+}
+.plbtn.special { border-color: #DDD6FE; color: #6D28D9; }
+.plbtn.special.selected { background: #6D28D9; border-color: #6D28D9; color: white; }
+.plbtn.weak::after {
+  content: '⚠'; position: absolute; top: 1px; right: 2px;
+  font-size: 7px; opacity: 0.55;
+}
+#picker-footer {
+  flex-shrink: 0; padding: 8px 12px 14px;
+  display: flex; gap: 8px; background: white;
+  border-top: 1px solid #E5E7EB;
+}
+#picker-random-btn {
+  flex: 1; padding: 11px; border-radius: 10px;
+  background: #F5F3FF; border: 1.5px solid #DDD6FE;
+  color: #6D28D9; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+#picker-random-btn:active { background: #EDE9FE; }
+#picker-go-btn {
+  flex: 2; padding: 11px; border-radius: 10px;
+  background: #4338CA; color: white;
+  font-size: 14px; font-weight: 800; cursor: pointer; border: none;
+}
+#picker-go-btn:active  { background: #3730A3; }
+#picker-go-btn:disabled { background: #A5B4FC; cursor: not-allowed; }
+#summary-screen {
+  display: none; position: fixed; inset: 0; z-index: 150;
+  background: #EEF2FF;
+  flex-direction: column; align-items: center;
+  padding: 24px 16px 32px; gap: 14px;
+  overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+#summary-screen.visible { display: flex; }
+#summary-title { font-size: 22px; font-weight: 800; color: #1F2937; text-align: center; }
+#summary-sub   { font-size: 13px; color: #6B7280; text-align: center; }
+#summary-score-row { display: flex; gap: 10px; width: 100%; max-width: 360px; }
+.sum-stat { flex: 1; background: white; border-radius: 12px; border: 1px solid #C7D2FE;
+  padding: 10px 6px; text-align: center; }
+.sum-stat .sum-n { font-size: 26px; font-weight: 800; }
+.sum-stat .sum-l { font-size: 10px; color: #9CA3AF; margin-top: 2px; text-transform: uppercase; letter-spacing: .04em; }
+.sum-stat.good .sum-n  { color: #16A34A; }
+.sum-stat.bad  .sum-n  { color: #DC2626; }
+.sum-stat.star .sum-n  { color: #D97706; }
+#summary-failed-box {
+  width: 100%; max-width: 360px;
+  background: white; border-radius: 12px; border: 1px solid #FECACA;
+}
+#summary-failed-title {
+  font-size: 10px; font-weight: 700; color: #9CA3AF;
+  text-transform: uppercase; letter-spacing: .06em;
+  padding: 8px 12px 4px;
+}
+#summary-failed-letters {
+  display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 12px 12px;
+}
+.fail-chip {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: #FEF2F2; border: 1.5px solid #FECACA;
+  color: #DC2626; font-size: 16px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+#summary-ok-box {
+  width: 100%; max-width: 360px;
+  background: #F0FDF4; border-radius: 12px; border: 1px solid #BBF7D0;
+  padding: 12px; text-align: center;
+  font-size: 14px; font-weight: 700; color: #16A34A;
+}
+#summary-btn-row { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 360px; }
+.sum-btn {
+  width: 100%; padding: 14px; border-radius: 12px;
+  font-size: 15px; font-weight: 800; cursor: pointer; border: none;
+}
+.sum-btn.primary   { background: #4338CA; color: white; }
+.sum-btn.primary:active { background: #3730A3; }
+.sum-btn.secondary { background: white; color: #4338CA; border: 1.5px solid #C7D2FE; }
+.sum-btn.secondary:active { background: #EEF2FF; }
+.sum-btn.danger-s  { background: #FEF2F2; color: #DC2626; border: 1.5px solid #FECACA; }
+.sum-btn.danger-s:active { background: #FEE2E2; }
+
+/* ── PER-LETTER STATS TABLE ── */
+#letter-stats-wrap { padding: 4px 12px 12px; }
+#letter-stats-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+#letter-stats-table th {
+  text-align: left; font-size: 10px; font-weight: 700; color: #9CA3AF;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: 4px 6px; border-bottom: 1px solid #F3F4F6;
+}
+#letter-stats-table td { padding: 5px 6px; border-bottom: 1px solid #F9FAFB; color: #374151; font-weight: 600; }
+#letter-stats-table tr:last-child td { border-bottom: none; }
+.lstat-letter { font-size: 15px; font-weight: 800; color: #4338CA; }
+.lstat-bar-wrap { width: 60px; height: 6px; background: #F3F4F6; border-radius: 3px; display:inline-block; }
+.lstat-bar { height: 6px; border-radius: 3px; background: #4338CA; }
+.lstat-bar.bad { background: #DC2626; }
+.problem-btn {
+  width: 100%; padding: 12px; border-radius: 10px;
+  background: #FEF3C7; border: 1.5px solid #FCD34D;
+  color: #92400E; font-size: 13px; font-weight: 700; cursor: pointer;
+  margin-top: 6px;
+}
+.problem-btn:active { background: #FDE68A; }
+.problem-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -322,8 +467,9 @@ html, body {
   </div>
 
   <div id="toolbar">
-    <button class="tbtn" onclick="undo()">↩ Rückgängig</button>
-    <button class="tbtn" onclick="clearCanvas()">🗑 Löschen</button>
+    <button class="tbtn" onclick="showPicker()">← Zurück</button>
+    <button class="tbtn" onclick="undo()">↩</button>
+    <button class="tbtn" onclick="clearCanvas()">🗑</button>
     <button class="tbtn go" onclick="checkDone()">⭐ Weiter</button>
   </div>
 
@@ -454,6 +600,66 @@ html, body {
     </div>
   </div>
 
+  <!-- Per-letter stats in settings -->
+  <div class="settings-section">
+    <div class="settings-section-title">📈 Buchstabenstatistik</div>
+    <div id="letter-stats-wrap">
+      <table id="letter-stats-table">
+        <thead><tr>
+          <th>Buchstabe</th><th>Versuche</th><th>Erfolgsquote</th><th>⭐ Ø</th>
+        </tr></thead>
+        <tbody id="letter-stats-body"></tbody>
+      </table>
+      <button class="problem-btn" id="problem-round-btn" onclick="startProblemRound()">
+        ⚠️ Schwache Buchstaben üben
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<!-- LETTER PICKER SCREEN -->
+<div id="picker-screen">
+  <div id="picker-header">
+    <div id="picker-header-text">
+      <div id="picker-title">Buchstaben auswählen</div>
+      <div id="picker-sub">Wähle bis zu 10 Buchstaben</div>
+    </div>
+    <div id="picker-case-toggle">
+      <button class="picker-case-btn active" id="picker-btn-upper" onclick="pickerSetCase('upper')">ABC</button>
+      <button class="picker-case-btn"        id="picker-btn-lower" onclick="pickerSetCase('lower')">abc</button>
+    </div>
+    <div id="picker-count-badge">0 / 10</div>
+  </div>
+  <div id="picker-grid"></div>
+  <div id="picker-footer">
+    <button id="picker-random-btn" onclick="pickerRandom()">🎲 Zufällig</button>
+    <button id="picker-go-btn" onclick="pickerStart()" disabled>▶ Los!</button>
+  </div>
+</div>
+
+<!-- ROUND SUMMARY SCREEN -->
+<div id="summary-screen">
+  <div style="font-size:52px;line-height:1;">🏁</div>
+  <div id="summary-title">Runde abgeschlossen!</div>
+  <div id="summary-sub"></div>
+  <div id="summary-score-row">
+    <div class="sum-stat good"><div class="sum-n" id="sum-passed">0</div><div class="sum-l">Richtig</div></div>
+    <div class="sum-stat bad" ><div class="sum-n" id="sum-failed">0</div><div class="sum-l">Falsch</div></div>
+    <div class="sum-stat star"><div class="sum-n" id="sum-stars">–</div><div class="sum-l">Ø Sterne</div></div>
+  </div>
+  <div id="summary-failed-box" style="display:none;">
+    <div id="summary-failed-title">❌ Nicht bestanden</div>
+    <div id="summary-failed-letters"></div>
+  </div>
+  <div id="summary-ok-box" style="display:none;">🎉 Alle Buchstaben richtig geschrieben!</div>
+  <div id="summary-btn-row">
+    <button class="sum-btn danger-s" id="sum-retry-btn" onclick="startRetryRound()" style="display:none;">
+      🔁 Fehler wiederholen
+    </button>
+    <button class="sum-btn primary" id="sum-next-btn" onclick="closeSummary()">▶ Weiter</button>
+    <button class="sum-btn secondary" onclick="closeSummaryToSettings()">📊 Statistik ansehen</button>
+  </div>
 </div>
 
 <!-- Confirm Modal -->
@@ -677,7 +883,6 @@ function onShowStatsChange(val) {
 function onGroupChange() {
   const az      = document.getElementById('grp-az').checked;
   const umlaut  = document.getElementById('grp-umlaut').checked;
-  // At least one must stay on
   if (!az && !umlaut) {
     document.getElementById(az ? 'grp-az' : 'grp-umlaut').checked = true;
     return;
@@ -685,34 +890,164 @@ function onGroupChange() {
   saveSetting('groupAZ', az);
   saveSetting('groupUmlaut', umlaut);
   rebuildLetters();
-  buildLetterBar();
-  const prog = loadProg();
-  doneSet = mode === 'upper' ? prog.upper : prog.lower;
-  selectIdx(0, false);
+  // Refresh picker if it's open
+  if (document.getElementById('picker-screen').classList.contains('visible')) showPicker();
 }
 
 // ── APP STATE ─────────────────────────────────────────────────────────────────
-let mode      = 'upper';
-let letters   = [];
-let idx       = 0;
-let doneSet   = new Set();
-let strokes   = [];
-let drawing   = false;
-let curStroke = [];
-let animRunning = false;
+const ROUND_SIZE = 10; // letters per round
+let mode        = 'upper';
+let allLetters  = []; // full alphabet for current mode+groups
+let letters     = []; // current round (picked letters)
+let idx         = 0;
+let doneSet     = new Set();
+let strokes     = [];
+let drawing     = false;
+let curStroke   = [];
+let animRunning  = false;
 let settingsOpen = false;
 
 const SK_UP = 'buch3_done_upper';
 const SK_LO = 'buch3_done_lower';
+const SK_LSTATS = 'buch3_letter_stats'; // long-term per-letter stats
+
+// ── LONG-TERM LETTER STATS ────────────────────────────────────────────────────
+// Format: { "upper_A": { attempts, passed, totalStars }, "lower_a": { ... }, ... }
+function loadLetterStats() {
+  try { return JSON.parse(localStorage.getItem(SK_LSTATS) || '{}'); } catch(e) { return {}; }
+}
+function saveLetterStats(stats) {
+  try { localStorage.setItem(SK_LSTATS, JSON.stringify(stats)); } catch(e) {}
+}
+function letterStatsKey(letter) {
+  return mode + '_' + letter;
+}
+function recordLetterResult(letter, passed, stars) {
+  // stars: 0 = failed, 1/2/3 = star count
+  const stats = loadLetterStats();
+  const key = mode + '_' + letter;
+  if (!stats[key]) stats[key] = { attempts: 0, passed: 0, totalStars: 0 };
+  stats[key].attempts++;
+  if (passed) { stats[key].passed++; stats[key].totalStars += stars; }
+  saveLetterStats(stats);
+}
+function getWeakLetters(threshold = 0.6) {
+  // Returns letters (in current mode) with a pass rate below threshold,
+  // having at least 2 attempts recorded.
+  const stats = loadLetterStats();
+  const allLetters = [...(mode === 'upper' ? ALL_UPPER : ALL_LOWER),
+                      ...(mode === 'upper' ? UMLAUTS_UP : UMLAUTS_LO)];
+  return [...new Set(allLetters)].filter(l => {
+    const s = stats[mode + '_' + l];
+    if (!s || s.attempts < 2) return false;
+    return (s.passed / s.attempts) < threshold;
+  });
+}
+
+// ── SESSION TRACKING ──────────────────────────────────────────────────────────
+// Track which letters were attempted and whether they passed this round
+let sessionResults = {}; // { letter: { passed: bool, stars: int, attempts: int } }
+let roundMode   = 'normal'; // 'normal' | 'retry' | 'problem'
+let roundLetters = [];
+let roundNumber  = 0; // increments each time pickerStart() is called
 
 function rebuildLetters() {
-  const base   = mode === 'upper' ? ALL_UPPER : ALL_LOWER;
-  const uml    = mode === 'upper' ? UMLAUTS_UP : UMLAUTS_LO;
+  const base = mode === 'upper' ? ALL_UPPER : ALL_LOWER;
+  const uml  = mode === 'upper' ? UMLAUTS_UP : UMLAUTS_LO;
   let result = [];
   if (settings.groupAZ)     result = result.concat(base);
   if (settings.groupUmlaut) result = result.concat(uml);
-  // Remove duplicates (ß appears in both)
-  letters = [...new Set(result)];
+  allLetters = [...new Set(result)];
+}
+
+// ── LETTER PICKER ─────────────────────────────────────────────────────────────
+let pickerSelected = new Set();
+
+function showPicker() {
+  pickerSelected = new Set();
+  // Sync case toggle buttons
+  document.getElementById('picker-btn-upper').classList.toggle('active', mode === 'upper');
+  document.getElementById('picker-btn-lower').classList.toggle('active', mode === 'lower');
+  const weak = new Set(getWeakLetters(0.6));
+  const grid = document.getElementById('picker-grid');
+  grid.innerHTML = '';
+  allLetters.forEach(l => {
+    const btn = document.createElement('button');
+    const special = ['Ä','Ö','Ü','ß','ä','ö','ü'].includes(l);
+    btn.className = 'plbtn' + (special ? ' special' : '') + (weak.has(l) ? ' weak' : '');
+    btn.textContent = l;
+    btn.onclick = () => pickerToggle(l, btn);
+    grid.appendChild(btn);
+  });
+  updatePickerUI();
+  document.getElementById('picker-screen').classList.add('visible');
+}
+
+function pickerSetCase(c) {
+  mode = c;
+  // Keep main header toggle in sync
+  document.getElementById('btn-upper').classList.toggle('active', c === 'upper');
+  document.getElementById('btn-lower').classList.toggle('active', c === 'lower');
+  sessionResults = {};
+  roundMode = 'normal';
+  rebuildLetters();
+  showPicker(); // rebuild grid for new case
+}
+
+function pickerToggle(letter, btn) {
+  if (pickerSelected.has(letter)) {
+    pickerSelected.delete(letter);
+    btn.classList.remove('selected');
+  } else {
+    if (pickerSelected.size >= ROUND_SIZE) return;
+    pickerSelected.add(letter);
+    btn.classList.add('selected');
+  }
+  speakLetter(letter);
+  updatePickerUI();
+}
+
+function updatePickerUI() {
+  const n = pickerSelected.size;
+  document.getElementById('picker-count-badge').textContent = `${n} / ${ROUND_SIZE}`;
+  document.getElementById('picker-go-btn').disabled = n === 0;
+  document.getElementById('picker-go-btn').textContent =
+    n === 0 ? '▶ Los!' : n < ROUND_SIZE ? `▶ Los! (${n})` : '▶ Los!';
+}
+
+function pickerRandom() {
+  // Pick ROUND_SIZE random letters from allLetters, preferring weak ones
+  const weak  = getWeakLetters(0.6).filter(l => allLetters.includes(l));
+  const rest  = allLetters.filter(l => !weak.includes(l));
+  const pool  = [...shuffle(weak), ...shuffle(rest)];
+  pickerSelected = new Set(pool.slice(0, ROUND_SIZE));
+  document.querySelectorAll('.plbtn').forEach(btn => {
+    btn.classList.toggle('selected', pickerSelected.has(btn.textContent));
+  });
+  updatePickerUI();
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickerStart() {
+  if (pickerSelected.size === 0) return;
+  document.getElementById('picker-screen').classList.remove('visible');
+  letters   = allLetters.filter(l => pickerSelected.has(l));
+  roundMode = 'normal';
+  roundNumber++;
+  sessionResults = {};
+  doneSet   = new Set();
+  saveProg();
+  buildLetterBar();
+  buildProg();
+  selectIdx(0, false);
 }
 
 function loadProg() {
@@ -735,7 +1070,7 @@ function toggleSettings() {
   document.getElementById('content').style.display = settingsOpen ? 'none' : 'flex';
   document.getElementById('letter-bar').style.display = settingsOpen ? 'none' : 'flex';
   document.getElementById('settings-btn').textContent = settingsOpen ? '✕' : '⚙️';
-  if (settingsOpen) updateStats();
+  if (settingsOpen) { updateStats(); updateLetterStatsTable(); }
 }
 
 function updateStats() {
@@ -761,10 +1096,13 @@ function doReset() {
   try {
     localStorage.removeItem(SK_UP);
     localStorage.removeItem(SK_LO);
+    localStorage.removeItem(SK_LSTATS);
   } catch(e) {}
   doneSet = new Set();
+  sessionResults = {};
   closeModal();
   updateStats();
+  updateLetterStatsTable();
   buildLetterBar();
   buildProg();
   setFeedback('', 'Fortschritt zurückgesetzt ✓');
@@ -967,30 +1305,66 @@ const LETTER_NAMES = {
   'Ä':'äh','Ö':'öh','Ü':'üh','ß':'eszett',
 };
 
-let _currentAudio = null;
+let _currentAudio  = null;
+let _audioUnlocked = false;
+let _pendingSpeak  = null; // letter queued before unlock happened
 
-function speakLetter(letter) {
-  if (!settings.audioEnabled) return;
+// Browsers block audio until a user gesture has occurred. The unlock handler
+// fires in the capture phase (before onclick), but audio.play() called in the
+// same microtask queue as the gesture still races against the browser's internal
+// trust-grant. We solve this by:
+//   1. Unlocking the AudioContext on the first gesture (capture phase).
+//   2. Any speakLetter() call that arrives before unlock stores itself as
+//      _pendingSpeak and plays after a 120 ms delay — by then the browser has
+//      fully registered the gesture and play() succeeds.
+(function unlockAudioOnFirstGesture() {
+  function unlock() {
+    if (_audioUnlocked) return;
+    _audioUnlocked = true;
+    try {
+      const actx = new (window.AudioContext || window.webkitAudioContext)();
+      const buf  = actx.createBuffer(1, 1, 22050);
+      const src  = actx.createBufferSource();
+      src.buffer = buf;
+      src.connect(actx.destination);
+      src.start(0);
+      actx.close();
+    } catch (_) {}
+    // Play any letter that was requested before the unlock settled
+    if (_pendingSpeak) {
+      const letter = _pendingSpeak;
+      _pendingSpeak = null;
+      setTimeout(() => _playAudio(letter), 120);
+    }
+    document.removeEventListener('touchstart', unlock, true);
+    document.removeEventListener('mousedown',  unlock, true);
+  }
+  document.addEventListener('touchstart', unlock, true);
+  document.addEventListener('mousedown',  unlock, true);
+})();
 
-  // Stop anything currently playing
+function _playAudio(letter) {
   if (_currentAudio) { _currentAudio.pause(); _currentAudio = null; }
-
-  // Look up the filename using uppercase key
   const key      = letter.toUpperCase();
   const filename = AUDIO_FILES[key] || AUDIO_FILES[letter];
-
   if (filename) {
     const audio = new Audio(filename);
     _currentAudio = audio;
-    audio.play().catch(() => {
-      // File missing or blocked — fall back to TTS
-      _currentAudio = null;
-      speakWithTTS(letter);
-    });
+    audio.play().catch(() => { _currentAudio = null; speakWithTTS(letter); });
     audio.onended = () => { _currentAudio = null; };
   } else {
     speakWithTTS(letter);
   }
+}
+
+function speakLetter(letter) {
+  if (!settings.audioEnabled) return;
+  if (!_audioUnlocked) {
+    // Store it; the unlock handler will play it after the gesture settles
+    _pendingSpeak = letter;
+    return;
+  }
+  _playAudio(letter);
 }
 
 function speakWithTTS(letter) {
@@ -1222,9 +1596,9 @@ function renderUserToCanvas(size) {
 }
 
 // Compare two ImageData objects pixel by pixel.
-// Returns a similarity score 0–1: fraction of reference pixels that
-// are also lit in the user drawing (recall), weighted with precision
-// to penalise scribbles that cover everything.
+// Returns { recall, precision } separately so checkDone can gate on both.
+// recall    = fraction of reference pixels the user covered  (did they hit the shape?)
+// precision = fraction of user pixels that landed on reference (did they stay on target?)
 function imageSimilarity(refData, userData) {
   const len = refData.data.length;
   const THRESH = 80; // brightness threshold to count as "lit"
@@ -1236,16 +1610,33 @@ function imageSimilarity(refData, userData) {
     if (uBright) userLit++;
     if (rBright && uBright) overlap++;
   }
-  if (refLit === 0) return 0;
-  const recall    = overlap / refLit;             // did they hit the reference?
-  const precision = userLit > 0 ? overlap / userLit : 0; // did they stay on target?
-  // F1-style harmonic mean, weighted slightly toward recall
-  return recall * 0.6 + precision * 0.4;
+  if (refLit === 0) return { recall: 0, precision: 0, f1: 0 };
+  const recall    = overlap / refLit;
+  const precision = userLit > 0 ? overlap / userLit : 0;
+  // True F1 (harmonic mean) — both recall AND precision must be good to score well
+  const f1 = (recall + precision > 0) ? 2 * recall * precision / (recall + precision) : 0;
+  return { recall, precision, f1 };
+}
+
+const MAX_FAILS_BEFORE_HINT = 3;
+let failStreak = 0; // resets when letter changes or succeeds
+
+function flashAndClear(color, delayMs) {
+  // Briefly tint the canvas, then auto-clear
+  const wrap = document.getElementById('canvas-wrap');
+  wrap.style.transition = 'box-shadow 0.15s';
+  wrap.style.boxShadow  = `inset 0 0 0 4px ${color}`;
+  setTimeout(() => {
+    wrap.style.boxShadow = '';
+    strokes = [];
+    drawGhostAndLines();
+    hideAnim();
+  }, delayMs);
 }
 
 function checkDone() {
   const pts = strokes.reduce((s, st) => s + st.length, 0);
-  if (pts < 8) {
+  if (pts < 20) {
     setFeedback('', 'Noch einmal versuchen! 💪');
     document.getElementById('feedback-msg').style.color = '#EF4444';
     return;
@@ -1257,34 +1648,79 @@ function checkDone() {
     if (!seqOk) {
       setFeedback('', 'Reihenfolge nicht wie in der App – versuch es nochmal! 🔢');
       document.getElementById('feedback-msg').style.color = '#F59E0B';
+      flashAndClear('#F59E0B', 700);
       return;
     }
   }
 
   // Shape similarity check
-  const SIZE = 80; // offscreen canvas size for comparison
+  const SIZE = 140;
   const refImg  = renderReferenceToCanvas(SIZE);
   const userImg = renderUserToCanvas(SIZE);
-  const score   = imageSimilarity(refImg, userImg); // 0.0 – 1.0
+  const { recall, precision, f1 } = imageSimilarity(refImg, userImg);
 
-  let stars, msg;
-  if (score >= 0.55)      { stars = '⭐⭐⭐'; msg = 'Super gemacht!'; }
-  else if (score >= 0.35) { stars = '⭐⭐';  msg = 'Gut gemacht!'; }
-  else if (score >= 0.18) { stars = '⭐';    msg = 'Weiter üben!'; }
-  else {
-    setFeedback('', 'Das sieht noch nicht richtig aus – versuch es nochmal! ✏️');
-    document.getElementById('feedback-msg').style.color = '#EF4444';
+  const MIN_RECALL    = 0.40;
+  const MIN_PRECISION = 0.30;
+
+  const letter = letters[idx];
+  const failed = recall < MIN_RECALL || precision < MIN_PRECISION || f1 < 0.36;
+
+  if (failed) {
+    if (!sessionResults[letter]) sessionResults[letter] = { passed: false, stars: 0, attempts: 0 };
+    sessionResults[letter].attempts++;
+    failStreak++;
+
+    if (failStreak >= MAX_FAILS_BEFORE_HINT) {
+      // Show the animation so the child can see how to write it
+      failStreak = 0;
+      setFeedback('', 'Schau genau zu – so geht\'s! 👀');
+      document.getElementById('feedback-msg').style.color = '#6D28D9';
+      flashAndClear('#EF4444', 600);
+      setTimeout(() => { showAnim(); }, 700);
+    } else {
+      const remaining = MAX_FAILS_BEFORE_HINT - failStreak;
+      const hint = remaining === 1 ? 'Noch ein Versuch, dann zeige ich es dir! 💡' : 'Das sieht noch nicht richtig aus – versuch es nochmal! ✏️';
+      setFeedback('', hint);
+      document.getElementById('feedback-msg').style.color = '#EF4444';
+      flashAndClear('#EF4444', 600);
+    }
     return;
   }
 
-  setFeedback(stars, msg);
+  let stars, msg;
+  if (f1 >= 0.62)      { stars = 3; msg = 'Super gemacht!'; }
+  else if (f1 >= 0.48) { stars = 2; msg = 'Gut gemacht!'; }
+  else                  { stars = 1; msg = 'Weiter üben!'; }
+
+  // Record pass
+  if (!sessionResults[letter]) sessionResults[letter] = { passed: false, stars: 0, attempts: 0 };
+  sessionResults[letter].attempts++;
+  sessionResults[letter].passed = true;
+  sessionResults[letter].stars  = stars;
+  recordLetterResult(letter, true, stars);
+  failStreak = 0;
+
+  setFeedback('★'.repeat(stars) + '☆'.repeat(3 - stars), msg);
   document.getElementById('feedback-msg').style.color = '#4338CA';
-  doneSet.add(letters[idx]);
+  doneSet.add(letter);
   saveProg();
   refreshLetterBar();
   buildProg();
-  if (score >= 0.55) confetti();
-  setTimeout(nextLetter, 1300);
+  if (stars === 3) confetti();
+
+  const isLast = (idx === letters.length - 1);
+  if (isLast) {
+    setTimeout(showRoundSummary, 1400);
+  } else {
+    setTimeout(nextLetter, 1300);
+  }
+}
+
+// Record a letter as failed (not passed) when user skips forward past it
+function recordSkippedLetter(letter) {
+  if (sessionResults[letter] && sessionResults[letter].passed) return; // already passed
+  recordLetterResult(letter, false, 0);
+  if (!sessionResults[letter]) sessionResults[letter] = { passed: false, stars: 0, attempts: 0 };
 }
 
 function setFeedback(stars, msg) {
@@ -1293,7 +1729,141 @@ function setFeedback(stars, msg) {
 }
 
 function nextLetter() {
+  // If user navigates away without passing, record as skipped/failed
+  const letter = letters[idx];
+  if (!sessionResults[letter] || !sessionResults[letter].passed) {
+    recordSkippedLetter(letter);
+  }
   selectIdx((idx + 1) % letters.length);
+}
+
+// ── ROUND SUMMARY ─────────────────────────────────────────────────────────────
+function showRoundSummary() {
+  const attempted = letters.filter(l => sessionResults[l] && sessionResults[l].attempts > 0);
+  const passed    = attempted.filter(l => sessionResults[l].passed);
+  const failed    = attempted.filter(l => !sessionResults[l].passed);
+  const totalStars = passed.reduce((s, l) => s + sessionResults[l].stars, 0);
+  const avgStars   = passed.length ? (totalStars / passed.length).toFixed(1) : '–';
+
+  document.getElementById('sum-passed').textContent = passed.length;
+  document.getElementById('sum-failed').textContent = failed.length;
+  document.getElementById('sum-stars').textContent  = avgStars;
+  document.getElementById('summary-sub').textContent =
+    `${attempted.length} von ${letters.length} Buchstaben versucht`;
+
+  const failedBox     = document.getElementById('summary-failed-box');
+  const failedLetters = document.getElementById('summary-failed-letters');
+  const okBox         = document.getElementById('summary-ok-box');
+  const retryBtn      = document.getElementById('sum-retry-btn');
+  const nextBtn       = document.getElementById('sum-next-btn');
+
+  failedLetters.innerHTML = '';
+  if (failed.length > 0) {
+    failedBox.style.display = '';
+    okBox.style.display     = 'none';
+    retryBtn.style.display  = '';
+    failed.forEach(l => {
+      const chip = document.createElement('div');
+      chip.className = 'fail-chip';
+      chip.textContent = l;
+      failedLetters.appendChild(chip);
+    });
+  } else {
+    failedBox.style.display = 'none';
+    okBox.style.display     = '';
+    retryBtn.style.display  = 'none';
+  }
+  nextBtn.textContent = '🎲 Neue Runde wählen';
+
+  document.getElementById('summary-screen').classList.add('visible');
+}
+
+function closeSummary() {
+  document.getElementById('summary-screen').classList.remove('visible');
+  startNormalRound();
+}
+
+function closeSummaryToSettings() {
+  document.getElementById('summary-screen').classList.remove('visible');
+  if (!settingsOpen) toggleSettings();
+  updateLetterStatsTable();
+}
+
+function startNormalRound() {
+  roundMode = 'normal';
+  rebuildLetters();
+  showPicker();
+}
+
+function startRetryRound() {
+  // Only the letters that failed this session
+  const failed = letters.filter(l => sessionResults[l] && !sessionResults[l].passed);
+  if (failed.length === 0) { closeSummary(); return; }
+  document.getElementById('summary-screen').classList.remove('visible');
+  roundMode = 'retry';
+  letters = failed;
+  buildLetterBar();
+  sessionResults = {};
+  doneSet = new Set();
+  saveProg();
+  buildProg();
+  selectIdx(0, false);
+}
+
+function startProblemRound() {
+  const weak = getWeakLetters(0.6);
+  if (weak.length === 0) return;
+  if (settingsOpen) toggleSettings();
+  roundMode = 'problem';
+  letters = weak;
+  buildLetterBar();
+  sessionResults = {};
+  doneSet = new Set();
+  saveProg();
+  buildProg();
+  selectIdx(0, false);
+}
+
+// ── LETTER STATS TABLE (Settings) ─────────────────────────────────────────────
+function updateLetterStatsTable() {
+  const stats = loadLetterStats();
+  const allL  = [...new Set([
+    ...(mode === 'upper' ? ALL_UPPER : ALL_LOWER),
+    ...(mode === 'upper' ? UMLAUTS_UP : UMLAUTS_LO),
+  ])];
+  const tbody = document.getElementById('letter-stats-body');
+  tbody.innerHTML = '';
+  allL.forEach(l => {
+    const s = stats[mode + '_' + l];
+    if (!s || s.attempts === 0) return;
+    const pct  = Math.round(s.passed / s.attempts * 100);
+    const avgS = s.passed > 0 ? (s.totalStars / s.passed).toFixed(1) : '–';
+    const isWeak = pct < 60;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="lstat-letter">${l}</td>
+      <td>${s.attempts}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:5px;">
+          <div class="lstat-bar-wrap"><div class="lstat-bar${isWeak?' bad':''}" style="width:${pct}%"></div></div>
+          <span style="font-size:11px;color:${isWeak?'#DC2626':'#16A34A'}">${pct}%</span>
+        </div>
+      </td>
+      <td>${avgS}</td>`;
+    tbody.appendChild(tr);
+  });
+  if (!tbody.children.length) {
+    const tr = document.createElement('tr');
+    tr.innerHTML = '<td colspan="4" style="color:#9CA3AF;padding:10px 0;text-align:center;">Noch keine Daten</td>';
+    tbody.appendChild(tr);
+  }
+  // Enable/disable problem round button
+  const weak = getWeakLetters(0.6);
+  const btn  = document.getElementById('problem-round-btn');
+  btn.disabled = weak.length === 0;
+  btn.textContent = weak.length > 0
+    ? `⚠️ Schwache Buchstaben üben (${weak.length})`
+    : '⚠️ Schwache Buchstaben üben';
 }
 
 // ── LETTER SELECT ─────────────────────────────────────────────────────────────
@@ -1306,6 +1876,7 @@ function selectIdx(newIdx, speak = true) {
   document.getElementById('guide-name').textContent = 'Buchstabe ' + letter;
   document.getElementById('guide-tip').textContent  = TIPS[letter] || 'Schreibe den Buchstaben nach.';
   strokes = [];
+  failStreak = 0;
   hideAnim();
   setFeedback('','');
   drawGhostAndLines();
@@ -1317,11 +1888,10 @@ function setCase(c) {
   mode = c;
   document.getElementById('btn-upper').classList.toggle('active', c==='upper');
   document.getElementById('btn-lower').classList.toggle('active', c==='lower');
-  const prog = loadProg();
-  doneSet = c==='upper' ? prog.upper : prog.lower;
+  sessionResults = {};
+  roundMode = 'normal';
   rebuildLetters();
-  buildLetterBar();
-  selectIdx(0, false);
+  showPicker();
 }
 
 function buildLetterBar() {
@@ -1355,8 +1925,12 @@ function buildProg() {
     dot.onclick = () => selectIdx(i);
     row.appendChild(dot);
   });
+  let roundLabel = '';
+  if (roundMode === 'retry')   roundLabel = ' · Wiederholung';
+  else if (roundMode === 'problem') roundLabel = ' · Problemrunde';
+  else if (roundNumber > 0)    roundLabel = ` · Runde ${roundNumber}`;
   document.getElementById('prog-label').textContent =
-    `Fortschritt: ${doneSet.size} / ${letters.length}`;
+    `Fortschritt: ${doneSet.size} / ${letters.length}${roundLabel}`;
 }
 
 // ── CONFETTI ──────────────────────────────────────────────────────────────────
@@ -1391,13 +1965,10 @@ function confetti() {
   loadSettings();
   rebuildLetters();
   applySettingsToUI();
-  const prog = loadProg();
-  doneSet = prog.upper;
-  buildLetterBar();
-  buildProg();
+  doneSet = new Set();
   requestAnimationFrame(() => {
     sizeCanvas();
-    selectIdx(0, false);
+    showPicker();
   });
   window.addEventListener('resize', () => { sizeCanvas(); });
 })();
